@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
-import {motion, spring} from 'motion/react'
+import {AnimatePresence, motion, spring} from 'motion/react'
 import LogIn from './login'
-import Sigin from './sigin'
+import Signin from './signin'
 
 const Login = () => {
 
@@ -11,18 +11,36 @@ const Login = () => {
     const closeLogin = () => {setLogin(false)}
 
     return (
-        <div className='w-dvh h-dvh bg-gray-500 flex justify-center place-items-center'>
+        <div className='w-screen h-screen bg-[#2b2261] flex justify-center place-items-center'>
             <motion.div 
-                className='bg-zinc-800 rounded-lg flex justify-center'
+                className='bg-[#836FFF] rounded-lg flex justify-center'
                 initial={{ width: 300, height: 350 }}
-                animate={isLogin ? { width: 400, height: 500 } : { width: 500, height: 600 }}
+                animate={isLogin ? { width: 400, height: 500 } : { width: 600, height: 700 }}
                 transition={{ type: "spring",duration: 0.4 }}   
             >
-                {isLogin? (
-                    <LogIn closeLogin={closeLogin}/>
-                ):( 
-                    <Sigin openLogin={openLogin}/>
+                
+                {isLogin ? (
+                    <motion.div
+                    key="login"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.3 }}
+                    >
+                    <LogIn closeLogin={closeLogin} />
+                    </motion.div>
+                ) : (
+                    <motion.div
+                    key="signup"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.3 }}
+                    >
+                    <Signin openLogin={openLogin} />
+                    </motion.div>
                 )}
+                
             </motion.div>
         </div>
     )

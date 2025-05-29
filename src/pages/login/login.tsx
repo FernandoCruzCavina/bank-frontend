@@ -31,22 +31,20 @@ const LogIn = ({closeLogin}:LogInProps) => {
   }
 
   return (
-    <form className='my-10 mx-10 bg-amber-400 space-y-12 rounded-2xl'>
-        <h1 className='text-amber-50'>Login</h1>
+    <form onSubmit={loginUser} className='my-10 mx-10 space-y-12 rounded-2xl text-center'>
+        <h1 className='text-cyan-50'>Login</h1>
         <div className='space-y-1'>
-          <div className=' bg-amber-700 px-2 space-y-1 flex flex-col justify-items-start text-start'>
-              <p>Nome</p>
-              <input className='' type="email" name='email' placeholder='email' />
+          <div className='space-y-1 flex flex-col justify-items-start text-start'>
+              <p className='text-[#15F5BA]'>Email</p>
+              <input className='bg-slate-700 hover:outline outline-[#15F5BA] placeholder:text-[#5ec6aa] text-white p-2 rounded' type="email" name='email' placeholder='email' />
           </div>
-          <div className=' bg-amber-700 px-2 space-y-1 flex flex-col justify-items-start text-start'>
-              <p>nome</p>
-              <input className='' type="password" name='password' placeholder='password' />
+          <div className='space-y-1 flex flex-col justify-items-start text-start'>
+              <p className='text-[#15F5BA]'>Senha</p>
+              <input className='bg-slate-700 hover:outline outline-[#15F5BA] placeholder:text-[#5ec6aa] text-white p-2 rounded' type="password" name='password' placeholder='password' />
           </div>
-        </div>
-        <div className='flex flex-col space-y-2'>
-            <button className=' hover:underline' onClick={()=>{closeLogin()}}>não tem uma conta?</button>
-            <button className='' onClick={()=>{loginUser}}>Login</button>
-        </div>
+          <button className='flex w-full hover:underline' onClick={()=>{closeLogin()}}>Não tem uma conta?</button>
+        </div>  
+        <button type='submit' className='flex w-full justify-center bg-slate-800 hover:bg-slate-700 text-white font-medium py-2 px-4 rounded-sm' >Login</button>
     </form>
   )
 }
