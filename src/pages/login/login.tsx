@@ -1,4 +1,4 @@
-import React, { type FormEvent } from 'react'
+import { type FormEvent } from 'react'
 import { api } from '../../lib/axios'
 import { useNavigate } from 'react-router-dom'
 interface LogInProps{
