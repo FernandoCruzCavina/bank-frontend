@@ -1,42 +1,82 @@
-// Payment.tsx
 import { motion } from "motion/react"
 import { useState } from "react"
-import { api } from "../../lib/axios"
+import type { Account } from "../../types/account"
+import type { Pix } from "../../types/pix"
+import { fetchPixByAccountId } from "../../services/pixService"
+import { fetchAccountByPix } from "../../services/accountService"
+import type { User } from "../../types/user"
+import { sendPix } from "../../services/paymentService"
+import type { CreatePayment } from "../../types/dtos/payment/createPayment"
+import { fetchUserByUserId } from "../../services/userService"
+import type { SearchTargetPayment } from "../../types/dtos/search/searchTargetToPix"
 
 const Payment = () => {
-  const [query, setQuery] = useState("")
-  const [paymentAmount, setPaymentAmount] = useState("");
-  const [result, setResult] = useState<any>(null)
+  const [pixKey, setPixKey] = useState("")
+  const [paymentAmount, setPaymentAmount] = useState("")
+  const [result, setResult] = useState<SearchTargetPayment|undefined>()
+  const [pixTarget, setPixTarget] = useState<Pix|undefined>()
+  const [userTarget, setUserTarget] = useState<User|undefined>()
+  const [accountTarget, setAccountTarget] = useState<Account|undefined>()
+  const [isLoading, setIsLoading] = useState(false)
+  const [paymentError, setPaymentError] = useState<string | null>(null)
+  const [paymentSuccess, setPaymentSuccess] = useState<boolean | null>(null)
+
 
   const handleSearch = async() => {
 
-    const response = await api.get(`/account/accounts/${query}`)
+    const token = localStorage.getItem('token')
+    if(token===null){return}
 
+    const account = await fetchAccountByPix(pixKey, token)
+    setAccountTarget(account)
+    if (!account) {
+      setPaymentError("Conta não encontrada.")
+      return
+    }
     
+    const pix = await fetchPixByAccountId(account.idAccount, token ) 
+    setPixTarget(pix)
 
-    setResult({
-      userId: "123456",
-      accountId: "acc789",
-      openedAt: "2023-04-01",
-      userName: "João Silva",
-      email: "joao@example.com",
-      accountNumber: "000123456789",
-      balance: "R$ 3.200,00",
-      status: "Ativa"
-    })
+    const user = await fetchUserByUserId(account.userModel, token)
+    setUserTarget(user)
+    
+    setResult({user, account, pix})
   }
 
-  function handlePayment(amount: number) {
-    throw new Error("Function not implemented.")
+  const handlePayment = async (amount: number) => {
+    setIsLoading(true)
+    setPaymentError(null)
+    setPaymentSuccess(null)
+
+    try {
+      const token = localStorage.getItem('token')
+      if (!token || !accountTarget?.idAccount || !pixTarget?.key) {
+        throw new Error("Token ou conta inválida.")
+      }
+
+      const createPayment: CreatePayment = {
+        paymentDescription: `Payment to account ${accountTarget.idAccount}`,
+        amountPaid: Number(paymentAmount)
+      }
+
+      const payment = await sendPix(accountTarget?.idAccount, pixTarget?.key, createPayment, token)
+
+      setPaymentSuccess(true)
+    } catch (error) {
+      setPaymentError("Falha ao realizar o pagamento.")
+    } finally {
+      setIsLoading(false)
+    }
   }
+
 
   return (
     <div className="space-y-4 p-4">
       <input
         type="text"
         placeholder="Buscar conta por nome, email ou número"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        value={pixKey}
+        onChange={(e) => setPixKey(e.target.value)}
         className="w-full p-2 rounded bg-[#3a3170] text-white"
       />
       <button
@@ -54,10 +94,10 @@ const Payment = () => {
           variants={itemVariants}
           className="bg-[#463898] p-4 rounded text-white space-y-2"
         >
-          <p><strong>Número da conta:</strong> {result.accountId}</p>
-          <p><strong>Nome:</strong> {result.userName}</p>
-          <p><strong>Email:</strong> {result.email}</p>
-          <p><strong>Data de Abertura:</strong> {result.openedAt}</p>
+          <p><strong>Número da conta:</strong> {result?.account?.accountNumber}</p>
+          <p><strong>Nome:</strong> {result?.user?.username}</p>
+          <p><strong>Email:</strong> {result?.user?.email}</p>
+          <p><strong>Data de Abertura:</strong> {result?.account?.createdAt}</p>
           <div className="space-y-2">
             <input
               type="number"
@@ -66,10 +106,50 @@ const Payment = () => {
               onChange={(e)=>{setPaymentAmount(e.target.value)}}
               className="w-full p-2 rounded bg-[#3a3170] text-white"
             />
-            <button onClick={()=>{handlePayment(Number(paymentAmount))}} className="w-full px-4 py-2 bg-[#15F5BA] text-black rounded">
+            <button disabled={isLoading} onClick={()=>{handlePayment(Number(paymentAmount))}} className="w-full px-4 py-2 bg-[#15F5BA] text-black rounded">
               Fazer Pagamento
             </button>
           </div>
+        </motion.div>
+      )}
+      {isLoading && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.3 }}
+            className="flex flex-col items-center space-y-4"
+          >
+            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-[#15F5BA]"></div>
+            <p className="text-white text-xl font-semibold">Processando pagamento...</p>
+          </motion.div>
+        </motion.div>
+      )}
+
+      {paymentError && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="text-red-400 mt-2 text-center"
+        >
+          {paymentError}
+        </motion.div>
+      )}
+      {paymentSuccess && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="text-green-400 mt-2 text-center"
+        >
+          Pagamento realizado com sucesso!
         </motion.div>
       )}
     </div>

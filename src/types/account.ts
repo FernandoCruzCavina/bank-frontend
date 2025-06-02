@@ -6,4 +6,5 @@ export interface Account{
   createdAt: number,
   lastUpdatedAt: number,
   imageUrl: string
+  userModel: number
 }

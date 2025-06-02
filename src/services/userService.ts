@@ -12,5 +12,15 @@ export const fetchUserByToken = async (token: string): Promise<User> => {
     },
   })
 
-  return response.data.content ?? response.data
+  return response.data
+}
+
+export const fetchUserByUserId = async (userId: number, token: string): Promise<User> => {
+  const response = await api.get(`/user/id=${userId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+
+  return response.data
 }
