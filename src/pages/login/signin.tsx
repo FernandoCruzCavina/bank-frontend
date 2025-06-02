@@ -1,7 +1,5 @@
 import React, { type FormEvent } from 'react'
 import { api } from '../../lib/axios'
-import { useNavigate } from 'react-router-dom'
-
 interface SigninProps{
     openLogin: ()=>void
 }
@@ -26,7 +24,12 @@ const Signin = ({openLogin}:SigninProps) => {
     }
 
     const response = api.post('/user', {
-
+      username,
+      email,
+      password,
+      phone,
+      cpf,
+      birthdayDate
     })
 
     console.log(response)

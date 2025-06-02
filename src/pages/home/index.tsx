@@ -1,20 +1,28 @@
 import { Settings, UserCircle2, XIcon } from 'lucide-react'
-import { AnimatePresence, useMotionValue, motion, useTransform, animate, type Variants } from 'motion/react'
+import { animate, AnimatePresence, motion, useMotionValue, useTransform, type Variants } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
-import Payment from './payment'
-import History from './history'
+import { fetchAccountByUserId } from '../../services/accountService'
+import { fetchUserByToken } from '../../services/userService'
+import type { Account } from '../../types/account'
+import type { User } from '../../types/user'
 import ConfigModal from './configuration'
+import History from './history'
+import Payment from './payment'
 
 const Home = () => {
+  const [user, setUser] = useState<User>()
+  const [account, setAccount] = useState<Account>()
   const [isPayment, setPayment] = useState(true)
   const [isOpenConfig, setConfig] = useState(false)
+
   const [origin, setOrigin] = useState({ x: 0, y: 0 })
   const btnRef = useRef<HTMLButtonElement>(null)
-  const amount = useMotionValue(1)
-
+  const amount = useMotionValue(0)
   const rounded = useTransform(amount, (latest) => Math.round(latest).toString())
+  
   const openPaymentModal =  ()=>{setPayment(true)}
   const closePaymentModal =  ()=>{setPayment(false)}
+  
   useEffect(() => {
     const controls = animate(amount, 100, {
       duration: 4,
@@ -22,6 +30,26 @@ const Home = () => {
     })
     return controls.stop
   }, [amount])
+
+  useEffect(() => {
+    if (account?.balance !== undefined) {
+    amount.set(account.balance)
+    }
+  }, [account, amount])
+
+  useEffect(() => {
+    const init = async () => {
+      const token = localStorage.getItem("token")
+      if (!token) return
+
+      const user = await fetchUserByToken(token)
+      setUser(user)
+      const account = await fetchAccountByUserId(user.id, token)
+      setAccount(account)
+    }
+
+  init()
+  }, [])
 
   const toggleConfig = () => {
     if (btnRef.current) {
@@ -42,7 +70,7 @@ const Home = () => {
             <button>
               <UserCircle2 />
             </button>
-            <p>Nome</p>
+            <p>${user?.username}</p>
           </div>
 
           <div className="flex z-50">

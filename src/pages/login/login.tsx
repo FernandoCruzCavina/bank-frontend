@@ -17,8 +17,8 @@ const LogIn = ({closeLogin}:LogInProps) => {
     const password = data.get('password')?.toString()
 
     const response = await api.post('/auth/login',{
-      'email': email,
-      'password': password 
+      email,
+      password 
     })
 
     const token = response.data
