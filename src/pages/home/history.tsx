@@ -1,27 +1,29 @@
 import { motion } from "motion/react"
 import { useState } from "react"
+import { extract } from "../../services/paymentService"
+import type { ViewPayment } from "../../types/dtos/payment/viewPayment"
 
-const History = () => {
+const History = ({accountId}:{accountId: number | undefined}) => {
   const [query, setQuery] = useState("")
-  const [transfers, setTransfers] = useState<any[]>([])
+  const [transfers, setTransfers] = useState<ViewPayment[]>([])
 
-  const handleSearch = () => {
-    setTransfers([
-      {
-        id: "tx001",
-        to: "Maria Oliveira",
-        amount: "R$ 500,00",
-        date: "2025-05-29",
-        status: "Concluída",
-      },
-      {
-        id: "tx002",
-        to: "Carlos Mendes",
-        amount: "R$ 250,00",
-        date: "2025-05-27",
-        status: "Concluída",
-      }
-    ])
+  const handleSearch = async() => {
+    const token = localStorage.getItem('token')
+
+    if(token===null||accountId===undefined) return
+    
+    const payments = await extract(accountId, token)
+
+    const formattedTransfers: ViewPayment[] = payments.map((payment) => ({
+      id: payment.idPayment,
+      receiver: payment.receiverAccount,
+      sender: payment.senderAccount,
+      amount: payment.amountPaid,
+      date: payment.paymentCompletionDate,
+      description: payment.paymentDescription
+    }))
+
+    setTransfers(formattedTransfers)
   }
 
   return (
@@ -48,11 +50,11 @@ const History = () => {
           className="space-y-3">
           {transfers.map((t) => (
             <div key={t.id}className="bg-[#463898] p-4 rounded text-white space-y-1">
-              <p><strong>ID:</strong> {t.id}</p>
-              <p><strong>Destinatário:</strong> {t.to}</p>
+              <p><strong>Enviador:</strong> {t.sender}</p>
+              <p><strong>Destinatário:</strong> {t.receiver}</p>
               <p><strong>Valor:</strong> {t.amount}</p>
               <p><strong>Data:</strong> {t.date}</p>
-              <p><strong>Status:</strong> {t.status}</p>
+              <p><strong>Descrição:</strong> {t.description}</p>
             </div>
           ))}
         </motion.div>

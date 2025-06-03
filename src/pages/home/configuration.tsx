@@ -1,20 +1,30 @@
 import { motion } from "motion/react"
 import { useState } from "react"
+import type { User } from "../../types/user"
+import { deleteUser, updateUser } from "../../services/userService"
+import type { UpdateUser } from "../../types/dtos/user/updateUser"
+import { useNavigate } from "react-router-dom"
 
-export const ConfigModal = ({ animate }: { animate: "open" | "closed" }) => {
+interface ConfigModalProps{
+  animate: "open" | "closed"
+  user: User | undefined
+}
+
+export const ConfigModal = ({ animate, user }: ConfigModalProps) => {
+  const navigate = useNavigate()
   const [form, setForm] = useState({
-    nome: "João Silva",
-    celular: "(11) 91234-5678",
-    senhaAntiga: "",
-    senhaNova: ""
+    username: user?.username,
+    phone: user?.phone,
+    oldPassword: "",
+    newPassword: ""
   })
 
   const dadosFixos = {
-    id: "USR123456",
-    email: "joao@example.com",
-    cpf: "123.456.789-00",
-    nascimento: "1990-05-15",
-    role: "USER"
+    id: user?.id,
+    email: user?.email,
+    cpf: user?.cpf,
+    nascimento: user?.birthdayDate,
+    role: user?.userRole
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -22,14 +32,36 @@ export const ConfigModal = ({ animate }: { animate: "open" | "closed" }) => {
     setForm(prev => ({ ...prev, [name]: value }))
   }
 
-  const atualizarDados = () => {
-    // Aqui você faria a chamada para atualizar os dados
+  const atualizarDados = async() => {
+    const token = localStorage.getItem('token')
+
+    if(form.username===undefined || form.phone===undefined || user?.id===undefined || token===null) return
+
+    const newUser: UpdateUser = {
+      username: form.username,
+      oldPassword: form.oldPassword,
+      newPassword: form.newPassword,
+      phone: form.phone
+    }
+    
+    user = await updateUser(user?.id, newUser, token)
     console.log("Atualizando:", form)
   }
 
-  const deletarConta = () => {
-    // Aqui você faria a chamada para deletar a conta
-    console.log("Conta deletada")
+  const deletarConta = async() => {
+    const token = localStorage.getItem('token')
+    
+    if(token===null || user?.id===undefined) return
+
+    const deletedUser= await deleteUser(user?.id, token)
+
+    if(deletedUser.id === user.id){
+      console.log("Conta deletada")
+      navigate('/login')
+    } else {
+      console.log('error')
+    }
+
   }
 
   return (
@@ -54,7 +86,7 @@ export const ConfigModal = ({ animate }: { animate: "open" | "closed" }) => {
           <input
             type="text"
             name="nome"
-            value={form.nome}
+            value={form.username}
             onChange={handleChange}
             className="w-full p-2 rounded bg-[#3a3170] text-white"
           />
@@ -64,7 +96,7 @@ export const ConfigModal = ({ animate }: { animate: "open" | "closed" }) => {
           <input
             type="text"
             name="celular"
-            value={form.celular}
+            value={form.phone}
             onChange={handleChange}
             className="w-full p-2 rounded bg-[#3a3170] text-white"
           />
@@ -74,7 +106,7 @@ export const ConfigModal = ({ animate }: { animate: "open" | "closed" }) => {
           <input
             type="password"
             name="senhaAntiga"
-            value={form.senhaAntiga}
+            value={form.oldPassword}
             onChange={handleChange}
             className="w-full p-2 rounded bg-[#3a3170] text-white"
           />
@@ -84,7 +116,7 @@ export const ConfigModal = ({ animate }: { animate: "open" | "closed" }) => {
           <input
             type="password"
             name="senhaNova"
-            value={form.senhaNova}
+            value={form.newPassword}
             onChange={handleChange}
             className="w-full p-2 rounded bg-[#3a3170] text-white"
           />

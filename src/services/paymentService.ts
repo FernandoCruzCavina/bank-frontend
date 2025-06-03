@@ -11,3 +11,13 @@ export const sendPix = async(accountId: number,pixKey: string, createPayment: Cr
     
     return response.data
 }
+
+export const extract = async(accountId: number, token: string): Promise<Payment[]> => {
+    const response = await api.get(`/payment/${accountId}`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    })
+
+    return response.data
+}

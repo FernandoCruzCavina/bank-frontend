@@ -1,12 +1,13 @@
 import React, { type FormEvent } from 'react'
 import { api } from '../../lib/axios'
+import { createUser } from '../../services/userService'
 interface SigninProps{
     openLogin: ()=>void
 }
 
 const Signin = ({openLogin}:SigninProps) => {
 
-  const siginUser= (event: FormEvent<HTMLFormElement>)=>{
+  const siginUser= async (event: FormEvent<HTMLFormElement>)=>{
     event.preventDefault()
 
     const data = new FormData(event.currentTarget)
@@ -23,13 +24,20 @@ const Signin = ({openLogin}:SigninProps) => {
       return
     }
 
-    const response = api.post('/user', {
-      username,
-      email,
-      password,
-      phone,
-      cpf,
-      birthdayDate
+    if(username === undefined || email === undefined || password === undefined 
+      || phone === undefined || cpf === undefined || birthdayDate === undefined
+    ) { 
+      console.log('undefined') 
+      return
+    }
+
+    const response = await createUser({
+      username: username,
+      email: email,
+      password: password,
+      phone: phone,
+      cpf: cpf,
+      birthdayDate: birthdayDate
     })
 
     console.log(response)

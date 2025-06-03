@@ -97,7 +97,7 @@ const Home = () => {
                       variants={getModalVariants(origin.x, origin.y)}
                       className="absolute inset-0 bg-[#8f7dfd]"
                     >
-                      <ConfigModal animate="open" />
+                      <ConfigModal animate="open" user={user}/>
                     </motion.div>
                   </div>
                 </div>)}
@@ -153,7 +153,7 @@ const Home = () => {
             exit={{ y: -10, opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
-            {isPayment ? <Payment /> : <History />}
+            {isPayment ? <Payment /> : <History accountId={account?.idAccount}/>}
           </motion.div>
         </AnimatePresence>
       </div>

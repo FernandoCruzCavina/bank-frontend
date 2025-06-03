@@ -1,10 +1,9 @@
 export interface Account{
-  idAccount: number
-  accountType: string,
+  idAccount: number,
   accountNumber: string,
   balance: number,
   createdAt: number,
   lastUpdatedAt: number,
-  imageUrl: string
+  imageUrl: string,
   userModel: number
 }

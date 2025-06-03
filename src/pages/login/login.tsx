@@ -1,6 +1,7 @@
 import { type FormEvent } from 'react'
 import { api } from '../../lib/axios'
 import { useNavigate } from 'react-router-dom'
+import { login } from '../../services/authService'
 interface LogInProps{
     closeLogin: ()=> void
 }
@@ -16,9 +17,11 @@ const LogIn = ({closeLogin}:LogInProps) => {
     const email = data.get('email')?.toString()
     const password = data.get('password')?.toString()
 
-    const response = await api.post('/auth/login',{
-      email,
-      password 
+    if(email === undefined || password === undefined) return
+
+    const response = await login({
+      email: email,
+      password: password 
     })
 
     const token = response.data

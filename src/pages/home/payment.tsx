@@ -43,13 +43,14 @@ const Payment = () => {
     setResult({user, account, pix})
   }
 
-  const handlePayment = async (amount: number) => {
+  const handlePayment = async () => {
     setIsLoading(true)
     setPaymentError(null)
     setPaymentSuccess(null)
 
     try {
       const token = localStorage.getItem('token')
+      
       if (!token || !accountTarget?.idAccount || !pixTarget?.key) {
         throw new Error("Token ou conta inválida.")
       }
@@ -106,7 +107,7 @@ const Payment = () => {
               onChange={(e)=>{setPaymentAmount(e.target.value)}}
               className="w-full p-2 rounded bg-[#3a3170] text-white"
             />
-            <button disabled={isLoading} onClick={()=>{handlePayment(Number(paymentAmount))}} className="w-full px-4 py-2 bg-[#15F5BA] text-black rounded">
+            <button disabled={isLoading} onClick={()=>{handlePayment()}} className="w-full px-4 py-2 bg-[#15F5BA] text-black rounded">
               Fazer Pagamento
             </button>
           </div>
