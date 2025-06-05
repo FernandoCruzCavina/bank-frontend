@@ -11,7 +11,12 @@ import type { SearchTargetPayment } from "../../types/dtos/search/searchTargetTo
 import { usePaymentSocket } from "../../hooks/usePaymentSocket"
 import { ConfirmModal } from "../../components/confirmModal"
 
-const Payment = () => {
+interface PaymentProps{
+  user: User | undefined
+  account: Account | undefined
+}
+
+const Payment = ({user, account}: PaymentProps) => {
   const [pixKey, setPixKey] = useState("")
   const [paymentAmount, setPaymentAmount] = useState("")
   const [result, setResult] = useState<SearchTargetPayment|undefined>()
@@ -23,6 +28,8 @@ const Payment = () => {
   const [paymentSuccess, setPaymentSuccess] = useState<boolean | null>(null)
   const [confirmData, setConfirmData] = useState<{ msg: string, onConfirm: () => void } | null>(null);
   const [respondFn, setRespondFn] = useState<((confirm: boolean) => void) | null>(null);
+  const [webSocketReady, setWebSocketReady] = useState(false)
+  const username = user?.username??"Guest"
 
   const { sendPaymentRequest } = usePaymentSocket((msg, respond) => {
     setConfirmData({
@@ -34,9 +41,7 @@ const Payment = () => {
       },
     })
     setRespondFn(() => respond)
-  })
-
-
+  }, username, webSocketReady)
 
   const handleSearch = async() => {
 
@@ -68,6 +73,8 @@ const Payment = () => {
         throw new Error("Conta ou chave PIX inválida.")
       }
 
+      setWebSocketReady(true)
+
       const createPayment: CreatePayment = {
         paymentDescription: `Pagamento via PIX para ${pixTarget.key}`,
         amountPaid: Number(paymentAmount),
@@ -75,15 +82,15 @@ const Payment = () => {
         idAccount: accountTarget.idAccount,
       }
 
-      sendPaymentRequest(createPayment)
-      setIsLoading(true) // mostra o spinner enquanto espera a resposta de confirmação
+      setTimeout(() => {
+        sendPaymentRequest(createPayment)
+        setIsLoading(true)
+      }, 200)
     } catch (error) {
       console.error(error)
       setPaymentError("Erro ao iniciar o pagamento.")
     }
   }
-
-
 
   return (
     <div className="space-y-4 p-4">

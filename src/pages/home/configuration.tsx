@@ -4,13 +4,15 @@ import type { User } from "../../types/user"
 import { deleteUser, updateUser } from "../../services/userService"
 import type { UpdateUser } from "../../types/dtos/user/updateUser"
 import { useNavigate } from "react-router-dom"
+import type { Account } from "../../types/account"
 
 interface ConfigModalProps{
   animate: "open" | "closed"
   user: User | undefined
+  account: Account | undefined
 }
 
-export const ConfigModal = ({ animate, user }: ConfigModalProps) => {
+export const ConfigModal = ({ animate, user, account }: ConfigModalProps) => {
   const navigate = useNavigate()
   const [form, setForm] = useState({
     username: user?.username,
@@ -19,12 +21,16 @@ export const ConfigModal = ({ animate, user }: ConfigModalProps) => {
     newPassword: ""
   })
 
-  const dadosFixos = {
+  const fixData = {
     id: user?.id,
     email: user?.email,
     cpf: user?.cpf,
     nascimento: user?.birthdayDate,
-    role: user?.userRole
+    role: user?.userRole,
+
+    accountNumber: account?.accountNumber,
+    createdAt: account?.createdAt,
+    lastUpdateAt: account?.lastUpdatedAt
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,11 +79,14 @@ export const ConfigModal = ({ animate, user }: ConfigModalProps) => {
       <h2 className="text-4xl font-bold mb-12">⚙️ Configurações</h2>
 
       <motion.div variants={itemVariants} className="mb-6 space-y-2">
-        <p><strong>ID Usuário:</strong> {dadosFixos.id}</p>
-        <p><strong>Email:</strong> {dadosFixos.email}</p>
-        <p><strong>CPF:</strong> {dadosFixos.cpf}</p>
-        <p><strong>Nascimento:</strong> {dadosFixos.nascimento}</p>
-        <p><strong>Tipo de Conta:</strong> {dadosFixos.role}</p>
+        <p><strong>ID Usuário:</strong> {fixData.id}</p>
+        <p><strong>Email:</strong> {fixData.email}</p>
+        <p><strong>CPF:</strong> {fixData.cpf}</p>
+        <p><strong>Nascimento:</strong> {fixData.nascimento}</p>
+        <p><strong>Tipo de Conta:</strong> {fixData.role}</p>
+        <p><strong>Número da Conta:</strong>{fixData.accountNumber}</p>
+        <p><strong>Criação de conta:</strong>{fixData.createdAt}</p>
+        <p><strong>Última atualização:</strong>{fixData.lastUpdateAt}</p>
       </motion.div>
 
       <motion.div variants={itemVariants} className="space-y-4 mb-6">
@@ -85,7 +94,7 @@ export const ConfigModal = ({ animate, user }: ConfigModalProps) => {
           <label>Nome:</label>
           <input
             type="text"
-            name="nome"
+            name="username"
             value={form.username}
             onChange={handleChange}
             className="w-full p-2 rounded bg-[#3a3170] text-white"
@@ -95,7 +104,7 @@ export const ConfigModal = ({ animate, user }: ConfigModalProps) => {
           <label>Celular:</label>
           <input
             type="text"
-            name="celular"
+            name="phone"
             value={form.phone}
             onChange={handleChange}
             className="w-full p-2 rounded bg-[#3a3170] text-white"
@@ -105,7 +114,7 @@ export const ConfigModal = ({ animate, user }: ConfigModalProps) => {
           <label>Senha Atual:</label>
           <input
             type="password"
-            name="senhaAntiga"
+            name="oldPassword"
             value={form.oldPassword}
             onChange={handleChange}
             className="w-full p-2 rounded bg-[#3a3170] text-white"
@@ -115,7 +124,7 @@ export const ConfigModal = ({ animate, user }: ConfigModalProps) => {
           <label>Nova Senha:</label>
           <input
             type="password"
-            name="senhaNova"
+            name="password"
             value={form.newPassword}
             onChange={handleChange}
             className="w-full p-2 rounded bg-[#3a3170] text-white"

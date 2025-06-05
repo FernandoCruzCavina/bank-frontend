@@ -16,7 +16,7 @@ const Home = () => {
   const [isOpenConfig, setConfig] = useState(false)
 
   const [origin, setOrigin] = useState({ x: 0, y: 0 })
-  const btnRef = useRef<HTMLButtonElement>(null)
+  const btnRefConfig = useRef<HTMLButtonElement>(null)
   const amount = useMotionValue(0)
   const rounded = useTransform(amount, (latest) => Math.round(latest).toString())
   
@@ -54,8 +54,8 @@ const Home = () => {
   }, [])
 
   const toggleConfig = () => {
-    if (btnRef.current) {
-      const rect = btnRef.current.getBoundingClientRect()
+    if (btnRefConfig.current) {
+      const rect = btnRefConfig.current.getBoundingClientRect()
       setOrigin({
         x: rect.left + rect.width / 2,
         y: rect.top + rect.height / 2,
@@ -69,15 +69,15 @@ const Home = () => {
       <div className="w-screen h-[10vh] bg-[#7662fb] px-[50vh] relative z-10">
         <div className="flex justify-between items-center h-full">
           <div className="flex space-x-3 items-center">
-            <button>
+            <div>
               <UserCircle2 />
-            </button>
+            </div>
             <p>{user?.username}</p>
           </div>
 
           <div className="flex z-50">
             <motion.button
-              ref={btnRef}
+              ref={btnRefConfig}
               animate={{ rotate: isOpenConfig ? 90 : 0 }}
               transition={{ duration: 0.4 }}
               onClick={toggleConfig}
@@ -88,8 +88,7 @@ const Home = () => {
             
             <AnimatePresence>
               {isOpenConfig && (
-                <div className="fixed inset-0 flex justify-center items-start  z-30 pointer-events-none">
-                  
+                <div className="fixed inset-0 flex justify-center items-start z-30 pointer-events-none">   
                   <div className="relative w-[50vw] h-screen overflow-hidden rounded-2xl pointer-events-auto shadow-2xl bg-transparent">
                     <motion.div
                       key="config-modal-bg"
@@ -99,12 +98,11 @@ const Home = () => {
                       variants={getModalVariants(origin.x, origin.y)}
                       className="absolute inset-0 bg-[#8f7dfd]"
                     >
-                      <ConfigModal animate="open" user={user}/>
+                      <ConfigModal animate="open" user={user} account={account}/>
                     </motion.div>
                   </div>
                 </div>)}
             </AnimatePresence>
-            
           </div>
         </div>
       </div>
@@ -155,7 +153,7 @@ const Home = () => {
             exit={{ y: -10, opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
-            {isPayment ? <Payment /> : <History accountId={account?.idAccount}/>}
+            {isPayment ? <Payment account={account} user={user}/> : <History accountId={account?.idAccount}/>}
           </motion.div>
         </AnimatePresence>
       </div>
