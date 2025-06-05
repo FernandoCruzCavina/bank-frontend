@@ -23,12 +23,14 @@ const LogIn = ({closeLogin}:LogInProps) => {
       email: email,
       password: password 
     })
-
-    const token = response.data
+    console.log(response)
+    const {token, refreshToken} = response
     console.log(token)
 
     localStorage.removeItem('token')
+    localStorage.removeItem('refresh')
     localStorage.setItem('token', token)
+    localStorage.setItem('refresh', refreshToken)
 
     navigate('/')
   }

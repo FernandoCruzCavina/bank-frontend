@@ -1,14 +1,14 @@
+import { jwtDecode } from 'jwt-decode'
 import { api } from '../lib/axios'
 import type { CreateUser } from '../types/dtos/user/createUser'
 import type { UpdateUser } from '../types/dtos/user/updateUser'
 import type { User } from '../types/user'
 
 export const fetchUserByToken = async (token: string): Promise<User> => {
-  const payloadBase64 = token.split(".")[1]
-  const payload = JSON.parse(atob(payloadBase64))
+  const payload = jwtDecode(token)
   const email = payload.sub
 
-  const response = await api.get(`/user/email=${email}`, {
+  const response = await api.get(`/user/email/${email}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -18,7 +18,7 @@ export const fetchUserByToken = async (token: string): Promise<User> => {
 }
 
 export const fetchUserByUserId = async (userId: number, token: string): Promise<User> => {
-  const response = await api.get(`/user/id=${userId}`, {
+  const response = await api.get(`/user/id/${userId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -34,7 +34,7 @@ export const createUser = async (createUser: CreateUser) => {
 }
 
 export const updateUser = async (userId: number, updateUser: UpdateUser, token: string): Promise<User> => {
-  const response = await api.put(`/user/id=${userId}`, updateUser, {
+  const response = await api.put(`/user/id/${userId}`, updateUser, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -44,7 +44,7 @@ export const updateUser = async (userId: number, updateUser: UpdateUser, token: 
 }
 
 export const deleteUser = async (userId: number, token: string) => {
-  const response = await api.delete(`/user/id=${userId}`, {
+  const response = await api.delete(`/user/id/${userId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

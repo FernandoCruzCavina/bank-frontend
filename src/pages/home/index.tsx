@@ -24,12 +24,14 @@ const Home = () => {
   const closePaymentModal =  ()=>{setPayment(false)}
   
   useEffect(() => {
-    const controls = animate(amount, 100, {
-      duration: 4,
-      ease: "easeInOut",
-    })
-    return controls.stop
-  }, [amount])
+    if (account?.balance !== undefined) {
+      const controls = animate(amount, account.balance, {
+        duration: 1.5,
+        ease: "easeInOut",
+      })
+      return () => controls.stop()
+    }
+  }, [account?.balance])
 
   useEffect(() => {
     if (account?.balance !== undefined) {
@@ -70,7 +72,7 @@ const Home = () => {
             <button>
               <UserCircle2 />
             </button>
-            <p>${user?.username}</p>
+            <p>{user?.username}</p>
           </div>
 
           <div className="flex z-50">

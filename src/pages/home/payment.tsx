@@ -5,10 +5,11 @@ import type { Pix } from "../../types/pix"
 import { fetchPixByAccountId } from "../../services/pixService"
 import { fetchAccountByPix } from "../../services/accountService"
 import type { User } from "../../types/user"
-import { sendPix } from "../../services/paymentService"
 import type { CreatePayment } from "../../types/dtos/payment/createPayment"
 import { fetchUserByUserId } from "../../services/userService"
 import type { SearchTargetPayment } from "../../types/dtos/search/searchTargetToPix"
+import { usePaymentSocket } from "../../hooks/usePaymentSocket"
+import { ConfirmModal } from "../../components/confirmModal"
 
 const Payment = () => {
   const [pixKey, setPixKey] = useState("")
@@ -20,6 +21,21 @@ const Payment = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [paymentError, setPaymentError] = useState<string | null>(null)
   const [paymentSuccess, setPaymentSuccess] = useState<boolean | null>(null)
+  const [confirmData, setConfirmData] = useState<{ msg: string, onConfirm: () => void } | null>(null);
+  const [respondFn, setRespondFn] = useState<((confirm: boolean) => void) | null>(null);
+
+  const { sendPaymentRequest } = usePaymentSocket((msg, respond) => {
+    setConfirmData({
+      msg,
+      onConfirm: () => {
+        respond(true)
+        setConfirmData(null)
+        setPaymentSuccess(true)
+      },
+    })
+    setRespondFn(() => respond)
+  })
+
 
 
   const handleSearch = async() => {
@@ -44,31 +60,29 @@ const Payment = () => {
   }
 
   const handlePayment = async () => {
-    setIsLoading(true)
     setPaymentError(null)
     setPaymentSuccess(null)
 
     try {
-      const token = localStorage.getItem('token')
-      
-      if (!token || !accountTarget?.idAccount || !pixTarget?.key) {
-        throw new Error("Token ou conta inválida.")
+      if (!accountTarget?.idAccount || !pixTarget?.key) {
+        throw new Error("Conta ou chave PIX inválida.")
       }
 
       const createPayment: CreatePayment = {
-        paymentDescription: `Payment to account ${accountTarget.idAccount}`,
-        amountPaid: Number(paymentAmount)
+        paymentDescription: `Pagamento via PIX para ${pixTarget.key}`,
+        amountPaid: Number(paymentAmount),
+        pixKey: pixTarget.key,
+        idAccount: accountTarget.idAccount,
       }
 
-      const payment = await sendPix(accountTarget?.idAccount, pixTarget?.key, createPayment, token)
-
-      setPaymentSuccess(true)
+      sendPaymentRequest(createPayment)
+      setIsLoading(true) // mostra o spinner enquanto espera a resposta de confirmação
     } catch (error) {
-      setPaymentError("Falha ao realizar o pagamento.")
-    } finally {
-      setIsLoading(false)
+      console.error(error)
+      setPaymentError("Erro ao iniciar o pagamento.")
     }
   }
+
 
 
   return (
@@ -152,6 +166,21 @@ const Payment = () => {
         >
           Pagamento realizado com sucesso!
         </motion.div>
+      )}
+      {confirmData && respondFn && (
+        <ConfirmModal
+          message={confirmData.msg}
+          onConfirm={() => {
+            respondFn(true);
+            setConfirmData(null);
+            setRespondFn(null);
+          }}
+          onCancel={() => {
+            respondFn(false);
+            setConfirmData(null);
+            setRespondFn(null);
+          }}
+        />
       )}
     </div>
   )
