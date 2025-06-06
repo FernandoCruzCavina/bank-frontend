@@ -1,5 +1,5 @@
 import { api } from "../lib/axios";
-import type { CreatePayment } from "../types/dtos/payment/createPayment";
+// import type { CreatePayment } from "../types/dtos/payment/requestPayment";
 import type { Payment } from "../types/payment";
 import { Client } from "@stomp/stompjs";
 import { WebSocket } from 'ws';

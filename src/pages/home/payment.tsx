@@ -5,7 +5,7 @@ import type { Pix } from "../../types/pix"
 import { fetchPixByAccountId } from "../../services/pixService"
 import { fetchAccountByPix } from "../../services/accountService"
 import type { User } from "../../types/user"
-import type { CreatePayment } from "../../types/dtos/payment/createPayment"
+import type { RequestPayment } from "../../types/dtos/payment/requestPayment"
 import { fetchUserByUserId } from "../../services/userService"
 import type { SearchTargetPayment } from "../../types/dtos/search/searchTargetToPix"
 import { usePaymentSocket } from "../../hooks/usePaymentSocket"
@@ -21,27 +21,28 @@ const Payment = ({user, account}: PaymentProps) => {
   const [paymentAmount, setPaymentAmount] = useState("")
   const [result, setResult] = useState<SearchTargetPayment|undefined>()
   const [pixTarget, setPixTarget] = useState<Pix|undefined>()
-  const [userTarget, setUserTarget] = useState<User|undefined>()
-  const [accountTarget, setAccountTarget] = useState<Account|undefined>()
   const [isLoading, setIsLoading] = useState(false)
   const [paymentError, setPaymentError] = useState<string | null>(null)
   const [paymentSuccess, setPaymentSuccess] = useState<boolean | null>(null)
-  const [confirmData, setConfirmData] = useState<{ msg: string, onConfirm: () => void } | null>(null);
-  const [respondFn, setRespondFn] = useState<((confirm: boolean) => void) | null>(null);
+  const [confirmData, setConfirmData] = useState<{ msg: string, onConfirm: () => void, onCancel: () => void} | null>(null);
   const [webSocketReady, setWebSocketReady] = useState(false)
   const username = user?.username??"Guest"
 
   const { sendPaymentRequest } = usePaymentSocket((msg, respond) => {
-    setConfirmData({
-      msg,
-      onConfirm: () => {
-        respond(true)
-        setConfirmData(null)
-        setPaymentSuccess(true)
-      },
-    })
-    setRespondFn(() => respond)
-  }, username, webSocketReady)
+  setConfirmData({
+    msg,
+    onConfirm: () => {
+      respond()
+      setConfirmData(null)
+      setPaymentSuccess(true)
+    },
+    onCancel: () => {
+      setConfirmData(null)
+      setPaymentError("Pagamento cancelado.")
+    },
+  })
+}, username, webSocketReady)
+
 
   const handleSearch = async() => {
 
@@ -49,18 +50,24 @@ const Payment = ({user, account}: PaymentProps) => {
     if(token===null){return}
 
     const account = await fetchAccountByPix(pixKey, token)
-    setAccountTarget(account)
     if (!account) {
       setPaymentError("Conta não encontrada.")
       return
     }
     
+    const user = await fetchUserByUserId(account.userModel, token)
+    if (!user) {
+      setPaymentError("User não encontrada.")
+      return
+    }
+
     const pix = await fetchPixByAccountId(account.idAccount, token ) 
     setPixTarget(pix)
+    if (!pix) {
+      setPaymentError("Pix não encontrada.")
+      return
+    }
 
-    const user = await fetchUserByUserId(account.userModel, token)
-    setUserTarget(user)
-    
     setResult({user, account, pix})
   }
 
@@ -69,17 +76,17 @@ const Payment = ({user, account}: PaymentProps) => {
     setPaymentSuccess(null)
 
     try {
-      if (!accountTarget?.idAccount || !pixTarget?.key) {
+      if (!pixTarget?.key || !account) {
         throw new Error("Conta ou chave PIX inválida.")
       }
 
       setWebSocketReady(true)
 
-      const createPayment: CreatePayment = {
+      const createPayment: RequestPayment = {
         paymentDescription: `Pagamento via PIX para ${pixTarget.key}`,
         amountPaid: Number(paymentAmount),
         pixKey: pixTarget.key,
-        idAccount: accountTarget.idAccount,
+        idAccount: account.idAccount,
       }
 
       setTimeout(() => {
@@ -174,21 +181,14 @@ const Payment = ({user, account}: PaymentProps) => {
           Pagamento realizado com sucesso!
         </motion.div>
       )}
-      {confirmData && respondFn && (
+      {confirmData && (
         <ConfirmModal
           message={confirmData.msg}
-          onConfirm={() => {
-            respondFn(true);
-            setConfirmData(null);
-            setRespondFn(null);
-          }}
-          onCancel={() => {
-            respondFn(false);
-            setConfirmData(null);
-            setRespondFn(null);
-          }}
+          onConfirm={confirmData.onConfirm}
+          onCancel={confirmData.onCancel}
         />
       )}
+
     </div>
   )
 }

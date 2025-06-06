@@ -10,9 +10,10 @@ interface ConfigModalProps{
   animate: "open" | "closed"
   user: User | undefined
   account: Account | undefined
+  onUserUpdate: (updatedUser: User) => void
 }
 
-export const ConfigModal = ({ animate, user, account }: ConfigModalProps) => {
+export const ConfigModal = ({ animate, user, account, onUserUpdate }: ConfigModalProps) => {
   const navigate = useNavigate()
   const [form, setForm] = useState({
     username: user?.username,
@@ -38,7 +39,7 @@ export const ConfigModal = ({ animate, user, account }: ConfigModalProps) => {
     setForm(prev => ({ ...prev, [name]: value }))
   }
 
-  const atualizarDados = async() => {
+  const updateData = async() => {
     const token = localStorage.getItem('token')
 
     if(form.username===undefined || form.phone===undefined || user?.id===undefined || token===null) return
@@ -52,9 +53,10 @@ export const ConfigModal = ({ animate, user, account }: ConfigModalProps) => {
     
     user = await updateUser(user?.id, newUser, token)
     console.log("Atualizando:", form)
+    onUserUpdate(user)
   }
 
-  const deletarConta = async() => {
+  const deleteAccount = async() => {
     const token = localStorage.getItem('token')
     
     if(token===null || user?.id===undefined) return
@@ -67,7 +69,6 @@ export const ConfigModal = ({ animate, user, account }: ConfigModalProps) => {
     } else {
       console.log('error')
     }
-
   }
 
   return (
@@ -137,13 +138,13 @@ export const ConfigModal = ({ animate, user, account }: ConfigModalProps) => {
         className="flex justify-between gap-4 mt-8"
       >
         <button
-          onClick={atualizarDados}
+          onClick={updateData}
           className="px-4 py-2 bg-[#15F5BA] text-black rounded hover:brightness-110"
         >
           Atualizar Dados
         </button>
         <button
-          onClick={deletarConta}
+          onClick={deleteAccount}
           className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
         >
           Deletar Conta

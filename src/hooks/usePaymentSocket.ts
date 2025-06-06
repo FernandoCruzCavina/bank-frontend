@@ -1,62 +1,68 @@
-import { useEffect, useRef } from "react"
-import { Client, type IMessage} from "@stomp/stompjs"
+import { useEffect, useRef, useState } from "react"
+import { Client } from "@stomp/stompjs"
+import type { RequestPayment } from "../types/dtos/payment/requestPayment"
 import type { CreatePayment } from "../types/dtos/payment/createPayment"
 
-type MessageHandler = (msg: string, respond: (confirm: boolean) => void) => void
-
 export const usePaymentSocket = (
-  onMessage: MessageHandler,
+  onConfirm: (msg: string, respond: () => void) => void,
   username: string,
-  enabled: boolean
-) => {
-  const clientRef = useRef<Client | null>(null)
-  const confirmDestinationRef = useRef<string | null>(null)
+  ready: boolean
+): { sendPaymentRequest: (payment: RequestPayment) => void } => {
+  const [client, setClient] = useState<Client | null>(null)
+  const lastPaymentRef = useRef<RequestPayment | null>(null)
 
   useEffect(() => {
-    if (!enabled) return
+    if (!ready || !username) return
 
-    const client = new Client({
+    const stomp = new Client({
       brokerURL: "ws://localhost:8082/ws-payment",
-      reconnectDelay: 5000,
-      connectHeaders: {
-        username: username,
-      }
-    })
+      onConnect: () => {
+        stomp.subscribe("/user/queue/confirm", (message) => {
+          const msg = message.body
 
-    client.onConnect = () => {
-      client.subscribe("/user/queue/confirm", (message: IMessage) => {
-        const body = JSON.parse(message.body)
-        const msg = body.message
-        const confirmDestination = body.confirmDestination
-        confirmDestinationRef.current = confirmDestination
+          const respond = () => {
+            if (!lastPaymentRef.current) return
 
-        onMessage(msg, (confirmed: boolean) => {
-          if (confirmDestination) {
-            client.publish({
-              destination: confirmDestination,
-              body: JSON.stringify({ confirmed }),
+            const confirmation: CreatePayment = {
+              ...lastPaymentRef.current,
+              isConfirm: true,
+            }
+
+            stomp.publish({
+              destination: "/app/confirm",
+              body: JSON.stringify(confirmation),
+              headers: { username },
             })
           }
-        })
-      })
-    }
 
-    client.activate()
-    clientRef.current = client
+          onConfirm(msg, respond)
+        })
+        stomp.subscribe("/user/queue/status", (message) => {
+          console.log("Status recebido do backend:", message.body)
+        })
+      },
+    })
+    stomp.activate()
+    setClient(stomp)
 
     return () => {
-      client.deactivate()
+      stomp.deactivate()
+      setClient(null)
     }
-  }, [enabled, username])
+  }, [ready, username, onConfirm])
 
-  const sendPaymentRequest = (payment: CreatePayment) => {
-    if (!clientRef.current || !clientRef.current.connected) {
-      throw new Error("WebSocket não conectado")
+  const sendPaymentRequest = (payment: RequestPayment) => {
+    if (!client?.connected) {
+      console.warn("WebSocket não conectado ainda.")
+      return
     }
 
-    clientRef.current.publish({
-      destination: "/app/payment/request",
+    lastPaymentRef.current = payment
+
+    client.publish({
+      destination: "/app/request",
       body: JSON.stringify(payment),
+      headers: { username },
     })
   }
 

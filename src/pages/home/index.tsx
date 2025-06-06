@@ -22,6 +22,9 @@ const Home = () => {
   
   const openPaymentModal =  ()=>{setPayment(true)}
   const closePaymentModal =  ()=>{setPayment(false)}
+
+  const handleUserUpdate = (updatedUser: User) => {setUser(updatedUser)}
+
   
   useEffect(() => {
     if (account?.balance !== undefined) {
@@ -98,7 +101,7 @@ const Home = () => {
                       variants={getModalVariants(origin.x, origin.y)}
                       className="absolute inset-0 bg-[#8f7dfd]"
                     >
-                      <ConfigModal animate="open" user={user} account={account}/>
+                      <ConfigModal animate="open" user={user} account={account} onUserUpdate={handleUserUpdate}/>
                     </motion.div>
                   </div>
                 </div>)}
