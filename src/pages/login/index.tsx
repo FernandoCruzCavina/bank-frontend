@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion} from 'motion/react'
 import LogIn from './login'
 import Signin from './signin'
+import background from '../../assets/background-novidades.svg'
 
 const Login = () => {
 
@@ -11,9 +12,9 @@ const Login = () => {
     const closeLogin = () => {setLogin(false)}
 
     return (
-        <div className='w-screen h-screen bg-[#2b2261] flex justify-center place-items-center'>
+        <div className='w-screen h-screen bg-[#ebebeb] flex justify-center place-items-center relative overflow-hidden'>
             <motion.div 
-                className='bg-[#836FFF] rounded-lg flex justify-center'
+                className='bg-[var(--primary-brad-1)] rounded-lg flex justify-center z-10 shadow-2xl'
                 initial={{ width: 300, height: 350 }}
                 animate={isLogin ? { width: 400, height: 500 } : { width: 600, height: 700 }}
                 transition={{ type: "spring",duration: 0.4 }}   
@@ -42,6 +43,8 @@ const Login = () => {
                 )}
                 
             </motion.div>
+            <img src={background}  className="absolute bottom-0 left-0 -translate-x-[-500px] z-0  w-[2000px] max-w-none pointer-events-none select-none -scale-100"/>
+            <img src={background}  className="absolute top-0 left-0 z-0 -translate-x-160 w-[2000px] max-w-none pointer-events-none select-none"/>
         </div>
     )
 }

@@ -5,6 +5,8 @@ import { deleteUser, updateUser } from "../../services/userService"
 import type { UpdateUser } from "../../types/dtos/user/updateUser"
 import { useNavigate } from "react-router-dom"
 import type { Account } from "../../types/account"
+import { toast } from "sonner"
+import type { BackendError } from "@/types/error"
 
 interface ConfigModalProps{
   animate: "open" | "closed"
@@ -40,6 +42,7 @@ export const ConfigModal = ({ animate, user, account, onUserUpdate }: ConfigModa
   }
 
   const updateData = async() => {
+    console.log('component')
     const token = localStorage.getItem('token')
 
     if(form.username===undefined || form.phone===undefined || user?.id===undefined || token===null) return
@@ -50,10 +53,17 @@ export const ConfigModal = ({ animate, user, account, onUserUpdate }: ConfigModa
       newPassword: form.newPassword,
       phone: form.phone
     }
-    
-    user = await updateUser(user?.id, newUser, token)
-    console.log("Atualizando:", form)
-    onUserUpdate(user)
+    try {
+      user = await updateUser(user?.id, newUser, token)
+      console.log("Atualizando:", form)
+      onUserUpdate(user)
+      toast("Atualizado com sucesso!", {
+        description: "nome, telefone e senha"
+      })
+    } catch (error: any) {
+      const responseError = error?.response?.data?.message || "Erro inesperado ao atualizar."
+      toast.error(responseError)
+    }
   }
 
   const deleteAccount = async() => {
@@ -98,7 +108,7 @@ export const ConfigModal = ({ animate, user, account, onUserUpdate }: ConfigModa
             name="username"
             value={form.username}
             onChange={handleChange}
-            className="w-full p-2 rounded bg-[#3a3170] text-white"
+            className="w-full p-2 rounded bg-slate-300 text-white "
           />
         </div>
         <div>
@@ -108,7 +118,7 @@ export const ConfigModal = ({ animate, user, account, onUserUpdate }: ConfigModa
             name="phone"
             value={form.phone}
             onChange={handleChange}
-            className="w-full p-2 rounded bg-[#3a3170] text-white"
+            className="w-full p-2 rounded bg-slate-300 text-white"
           />
         </div>
         <div>
@@ -118,7 +128,7 @@ export const ConfigModal = ({ animate, user, account, onUserUpdate }: ConfigModa
             name="oldPassword"
             value={form.oldPassword}
             onChange={handleChange}
-            className="w-full p-2 rounded bg-[#3a3170] text-white"
+            className="w-full p-2 rounded bg-slate-300 text-white"
           />
         </div>
         <div>
@@ -128,7 +138,7 @@ export const ConfigModal = ({ animate, user, account, onUserUpdate }: ConfigModa
             name="password"
             value={form.newPassword}
             onChange={handleChange}
-            className="w-full p-2 rounded bg-[#3a3170] text-white"
+            className="w-full p-2 rounded bg-slate-300 text-white"
           />
         </div>
       </motion.div>

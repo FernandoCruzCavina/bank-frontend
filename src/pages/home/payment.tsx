@@ -9,7 +9,7 @@ import type { RequestPayment } from "../../types/dtos/payment/requestPayment"
 import { fetchUserByUserId } from "../../services/userService"
 import type { SearchTargetPayment } from "../../types/dtos/search/searchTargetToPix"
 import { usePaymentSocket } from "../../hooks/usePaymentSocket"
-import { ConfirmModal } from "../../components/confirmModal"
+import { ConfirmModal } from "../../components/home-modal/confirmModal"
 
 interface PaymentProps{
   user: User | undefined
@@ -106,11 +106,11 @@ const Payment = ({user, account}: PaymentProps) => {
         placeholder="Buscar conta por nome, email ou número"
         value={pixKey}
         onChange={(e) => setPixKey(e.target.value)}
-        className="w-full p-2 rounded bg-[#3a3170] text-white"
+        className="w-full p-2 rounded bg-slate-400 text-white placeholder:text-white"
       />
       <button
         onClick={handleSearch}
-        className="px-4 py-2 bg-[#15F5BA] text-black rounded"
+        className="px-4 py-2 bg-amber-400 text-black rounded"
       >
         Buscar
       </button>

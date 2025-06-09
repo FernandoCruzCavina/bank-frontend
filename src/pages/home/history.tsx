@@ -33,11 +33,11 @@ const History = ({accountId}:{accountId: number | undefined}) => {
         placeholder="Buscar transferências por nome ou data"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="w-full p-2 rounded bg-[#3a3170] text-white"
+        className="w-full p-2 rounded bg-slate-400 text-white placeholder:text-white"
       />
       <button
         onClick={handleSearch}
-        className="px-4 py-2 bg-[#15F5BA] text-black rounded"
+        className="px-4 py-2 bg-amber-400 text-black rounded"
       >
         Buscar
       </button>
