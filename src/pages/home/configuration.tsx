@@ -1,12 +1,12 @@
+import { EyeClosedIcon, EyeIcon } from "lucide-react"
 import { motion } from "motion/react"
 import { useState } from "react"
-import type { User } from "../../types/user"
-import { deleteUser, updateUser } from "../../services/userService"
-import type { UpdateUser } from "../../types/dtos/user/updateUser"
 import { useNavigate } from "react-router-dom"
-import type { Account } from "../../types/account"
 import { toast } from "sonner"
-import type { BackendError } from "@/types/error"
+import { deleteUser, updateUser } from "../../services/userService"
+import type { Account } from "../../types/account"
+import type { UpdateUser } from "../../types/dtos/user/updateUser"
+import type { User } from "../../types/user"
 
 interface ConfigModalProps{
   animate: "open" | "closed"
@@ -88,18 +88,17 @@ export const ConfigModal = ({ animate, user, account, onUserUpdate }: ConfigModa
       variants={navVariants}
       className="absolute w-full h-screen flex flex-col justify-center ite p-16 overflow-y-auto text-white z-40"
     >
-      <h2 className="text-4xl font-bold mb-12">⚙️ Configurações</h2>
+      <h2 className="text-4xl font-bold mb-12">Configurações</h2>
     
       <button
-    onClick={() => setShowSensitive(!showSensitive)}
-    className=" mb-2 px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
-  >
-    {showSensitive ? "Ocultar Dados 🔒" : "Mostrar Dados 🔓"}
-  </button>
-
+        onClick={() => setShowSensitive(!showSensitive)}
+        className="flex self-center mb-2 px-3 py-1 bg-red-400 text-white rounded-4xl text-sm hover:bg-red-300"
+      >
+        {showSensitive ? <EyeIcon /> : <EyeClosedIcon />}
+      </button>
 
       <motion.div variants={itemVariants} className={`${showSensitive ? '' : 'blur-xs select-none'} mb-6 space-y-2`}>
-        <p><strong>ID Usuário:</strong> {fixData.id}</p>
+        {/* <p><strong>ID Usuário:</strong> {fixData.id}</p> */}
         <p><strong>Email:</strong> {fixData.email}</p>
         <p><strong>CPF:</strong> {fixData.cpf}</p>
         <p><strong>Nascimento:</strong> {fixData.nascimento}</p>

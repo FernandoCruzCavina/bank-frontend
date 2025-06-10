@@ -1,7 +1,7 @@
-import { deletePixByPixId, createPix, updatePix, fetchAllPixFromAccountByAccountId } from '@/services/pixService'
+import { createPix, deletePixByPixId, fetchAllPixFromAccountByAccountId, updatePix } from '@/services/pixService'
 import type { Account } from '@/types/account'
 import type { Pix } from '@/types/pix'
-import { Check, Pencil, XIcon } from 'lucide-react'
+import { Check, Pencil, Trash2Icon, XIcon } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -175,18 +175,27 @@ const KeyChooseModal = ({ animate, account, pix, refreshPix }: KeyChooseModalPro
                             setEditingValue(k.key)
                             setEditingType(k.keyType)
                             }}
-                            className="bg-pink-400 px-2 py-1 rounded hover:bg-pink-500"
+                            className="bg-pink-600 px-2 py-1 rounded hover:bg-pink-700"
                         >
                             <Pencil />
                         </button>
                         )}
 
-                        <button
-                        onClick={() => deleteKey(k.idPix)}
-                        className="bg-red-600 px-2 py-1 rounded hover:bg-red-700"
-                        >
-                        <XIcon />
-                        </button>
+                        {editingPixId === k.idPix? (
+                          <button
+                            onClick={() => setEditingPixId(null)}
+                            className="bg-red-600 px-2 py-1 rounded hover:bg-red-700"
+                            >
+                            <XIcon />
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => deleteKey(k.idPix)}
+                            className="bg-red-600 px-2 py-1 rounded hover:bg-red-700"
+                            >
+                            <Trash2Icon />
+                          </button>
+                        )}
                     </li>
                     ))}
                 </ul>

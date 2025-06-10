@@ -1,11 +1,9 @@
+import { fetchExtractByAccountId } from "@/services/accountService"
 import { motion } from "motion/react"
 import { useEffect, useState } from "react"
-import { extract } from "../../services/paymentService"
 import type { ViewPayment } from "../../types/dtos/payment/viewPayment"
-import { fetchExtractByAccountId } from "@/services/accountService"
 
 const History = ({accountId}:{accountId: number | undefined}) => {
-  const [query, setQuery] = useState("")
   const [transfers, setTransfers] = useState<ViewPayment[]>([])
 
   useEffect(()=>{
@@ -19,41 +17,9 @@ const History = ({accountId}:{accountId: number | undefined}) => {
     init()
   }, [])
 
-  // const handleSearch = async() => {
-  //   const token = localStorage.getItem('token')
-
-  //   if(token===null||accountId===undefined) return
-    
-  //   const payments = await extract(accountId, token)
-
-  //   const formattedTransfers: ViewPayment[] = payments.map((payment) => ({
-  //     id: payment.idPayment,
-  //     receiver: payment.receiverAccount,
-  //     sender: payment.senderAccount,
-  //     amount: payment.amountPaid,
-  //     date: payment.paymentCompletionDate,
-  //     description: payment.paymentDescription
-  //   }))
-
-  //   setTransfers(formattedTransfers)
-  // }
 
   return (
     <div className="space-y-4 p-4">
-      {/* <input
-        type="text"
-        placeholder="Buscar transferências por nome ou data"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        className="w-full p-2 rounded bg-slate-400 text-white placeholder:text-white"
-      />
-      <button
-        onClick={handleSearch}
-        className="px-4 py-2 bg-amber-400 text-black rounded"
-      >
-        Buscar
-      </button> */}
-
       {transfers.length > 0 && (
         <motion.div 
           initial={"hidden"}

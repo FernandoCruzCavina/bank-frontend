@@ -1,17 +1,17 @@
+import { fetchAllPixFromAccountByAccountId } from '@/services/pixService'
+import type { Pix } from '@/types/pix'
 import { KeyIcon, Settings, UserCircle2, XIcon } from 'lucide-react'
 import { animate, AnimatePresence, motion, useMotionValue, useTransform, type Variants } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
+import bradesco from '../../assets/logo-mobile.svg'
 import { fetchAccountByUserId } from '../../services/accountService'
 import { fetchUserByToken } from '../../services/userService'
 import type { Account } from '../../types/account'
 import type { User } from '../../types/user'
 import ConfigModal from './configuration'
 import History from './history'
-import Payment from './payment'
-import bradesco from '../../assets/logo-mobile.svg'
 import KeyChoose from './key-choose'
-import type { Pix } from '@/types/pix'
-import { fetchAllPixFromAccountByAccountId, fetchPixByAccountId } from '@/services/pixService'
+import Payment from './payment'
 
 const Home = () => {
   const [user, setUser] = useState<User>()
@@ -22,6 +22,9 @@ const Home = () => {
   const [isOpenKeyChoose, setKeyChoose] = useState(false)
 
   const [origin, setOrigin] = useState({ x: 0, y: 0 })
+  const [originConfig, setOriginConfig] = useState({ x: 0, y: 0 })
+  const [originKeyChoose, setOriginKeyChoose] = useState({ x: 0, y: 0 })
+
   const btnRefConfig = useRef<HTMLButtonElement>(null)
   const btnRefKeyChoose = useRef<HTMLButtonElement>(null)
   const amount = useMotionValue(0)
@@ -92,7 +95,7 @@ const Home = () => {
 
   return (
     <>
-      <div className="w-screen h-[10vh] bg-[var(--primary-brad-1)] px-[50vh] relative z-10">
+      <div className="w-screen h-[10vh] bg-[var(--primary-brad-1)] px-[50vh]  z-10">
         <div className="flex flex-col h-full">
           <div className='flex pt-2'>
             <img src={bradesco} alt="" />
@@ -110,6 +113,7 @@ const Home = () => {
                 ref={btnRefKeyChoose}
                 animate={{ rotate: isOpenKeyChoose? 90 : 0 }}
                 onClick={toggleKeyChoose}
+                variants={getModalVariants(originConfig.x, originConfig.y)}
                 className='flex bg-red-400 p-2 rounded-full z-40 text-red-50 mr-4'
               >
                 {isOpenKeyChoose? <XIcon /> : <KeyIcon />}
@@ -118,6 +122,7 @@ const Home = () => {
                 ref={btnRefConfig}
                 animate={{ rotate: isOpenConfig ? 90 : 0 }}
                 onClick={toggleConfig}
+                variants={getModalVariants(originKeyChoose.x, originKeyChoose.y)}
                 className="flex bg-red-400 p-2 rounded-full z-40 text-red-50"
               >
                 {isOpenConfig ? <XIcon /> : <Settings />}
@@ -216,23 +221,28 @@ const Home = () => {
   )
 }
 
-const getModalVariants = (x: number, y: number): Variants => ({
-  open: {
-    clipPath: `circle(1600px at ${x - 380}px ${y}px)`,
-    transition: {
-      type: "spring",
-      stiffness: 20,
-      restDelta: 2,
+const getModalVariants = (x: number, y: number): Variants => {
+  const modalLeft = window.innerWidth * 0.25
+  const relativeX = x - modalLeft
+
+  return {
+    open: {
+      clipPath: `circle(1600px at ${relativeX}px ${y}px)`,
+      transition: {
+        type: "spring",
+        stiffness: 20,
+        restDelta: 2,
+      },
     },
-  },
-  closed: {
-    clipPath: `circle(25px at ${x -380}px ${y}px)`,
-    transition: {
-      type: "spring",
-      stiffness: 400,
-      damping: 40,
+    closed: {
+      clipPath: `circle(25px at ${relativeX}px ${y}px)`,
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 40,
+      },
     },
-  },
-})
+  }
+}
 
 export default Home
