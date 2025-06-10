@@ -10,6 +10,7 @@ import { fetchUserByUserId } from "../../services/userService"
 import type { SearchTargetPayment } from "../../types/dtos/search/searchTargetToPix"
 import { usePaymentSocket } from "../../hooks/usePaymentSocket"
 import { ConfirmModal } from "../../components/home-modal/confirmModal"
+import { toast } from "sonner"
 
 interface PaymentProps{
   user: User | undefined
@@ -49,26 +50,17 @@ const Payment = ({user, account}: PaymentProps) => {
     const token = localStorage.getItem('token')
     if(token===null){return}
 
-    const account = await fetchAccountByPix(pixKey, token)
-    if (!account) {
-      setPaymentError("Conta não encontrada.")
-      return
+    try {
+      const account = await fetchAccountByPix(pixKey, token)
+      const user = await fetchUserByUserId(account.userModel, token)
+      const pix = await fetchPixByAccountId(account.idAccount, token ) 
+      setPixTarget(pix)
+      setResult({user, account, pix})
+    } catch (error: any) {
+      toast.error('Conta não encontrada',{
+        description: error.message || error
+      })
     }
-    
-    const user = await fetchUserByUserId(account.userModel, token)
-    if (!user) {
-      setPaymentError("User não encontrada.")
-      return
-    }
-
-    const pix = await fetchPixByAccountId(account.idAccount, token ) 
-    setPixTarget(pix)
-    if (!pix) {
-      setPaymentError("Pix não encontrada.")
-      return
-    }
-
-    setResult({user, account, pix})
   }
 
   const handlePayment = async () => {

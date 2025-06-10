@@ -102,7 +102,7 @@ export const ConfigModal = ({ animate, user, account, onUserUpdate }: ConfigModa
         <p><strong>Email:</strong> {fixData.email}</p>
         <p><strong>CPF:</strong> {fixData.cpf}</p>
         <p><strong>Nascimento:</strong> {fixData.nascimento}</p>
-        <p><strong>Tipo de Conta:</strong> {fixData.role}</p>
+        {/* <p><strong>Tipo de Conta:</strong> {fixData.role}</p> */}
         <p><strong>Número da Conta:</strong>{fixData.accountNumber}</p>
         <p><strong>Criação de conta:</strong>{fixData.createdAt}</p>
         <p><strong>Última atualização:</strong>{fixData.lastUpdateAt}</p>

@@ -72,6 +72,8 @@ const KeyChooseModal = ({ animate, account, pix, refreshPix }: KeyChooseModalPro
       toast.error('Erro ao registrar chave', {
         description: error.message || error
       })
+      console.log(error)
+      console.log(error.message)
     } finally {
       setLoading(false)
     }
@@ -160,42 +162,44 @@ const KeyChooseModal = ({ animate, account, pix, refreshPix }: KeyChooseModalPro
                         <span>{k.keyType}: {k.key}</span>
                         )}
 
-                        {editingPixId === k.idPix ? (
-                        <button
-                            onClick={() => updateKey(k.idPix)}
-                            disabled={loading || !editingValue}
-                            className="bg-green-500 px-2 py-1 rounded hover:bg-green-600"
-                        >
-                            <Check />
-                        </button>
-                        ) : (
-                        <button
-                            onClick={() => {
-                            setEditingPixId(k.idPix)
-                            setEditingValue(k.key)
-                            setEditingType(k.keyType)
-                            }}
-                            className="bg-pink-600 px-2 py-1 rounded hover:bg-pink-700"
-                        >
-                            <Pencil />
-                        </button>
-                        )}
+                        <div className='flex space-x-3'>
+                          {editingPixId === k.idPix ? (
+                          <button
+                              onClick={() => updateKey(k.idPix)}
+                              disabled={loading || !editingValue}
+                              className="bg-green-500 px-2 py-1 rounded hover:bg-green-600"
+                          >
+                              <Check />
+                          </button>
+                          ) : (
+                          <button
+                              onClick={() => {
+                              setEditingPixId(k.idPix)
+                              setEditingValue(k.key)
+                              setEditingType(k.keyType)
+                              }}
+                              className="bg-pink-600 px-2 py-1 rounded hover:bg-pink-700"
+                          >
+                              <Pencil />
+                          </button>
+                          )}
 
-                        {editingPixId === k.idPix? (
-                          <button
-                            onClick={() => setEditingPixId(null)}
-                            className="bg-red-600 px-2 py-1 rounded hover:bg-red-700"
-                            >
-                            <XIcon />
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => deleteKey(k.idPix)}
-                            className="bg-red-600 px-2 py-1 rounded hover:bg-red-700"
-                            >
-                            <Trash2Icon />
-                          </button>
-                        )}
+                          {editingPixId === k.idPix? (
+                            <button
+                              onClick={() => setEditingPixId(null)}
+                              className="bg-red-600 px-2 py-1 rounded hover:bg-red-700"
+                              >
+                              <XIcon />
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => deleteKey(k.idPix)}
+                              className="bg-red-600 px-2 py-1 rounded hover:bg-red-700"
+                              >
+                              <Trash2Icon />
+                            </button>
+                          )}
+                        </div>
                     </li>
                     ))}
                 </ul>

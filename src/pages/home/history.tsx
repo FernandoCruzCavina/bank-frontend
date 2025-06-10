@@ -25,9 +25,9 @@ const History = ({accountId}:{accountId: number | undefined}) => {
           initial={"hidden"}
           animate={"visible"}
           variants={itemVariants}
-          className="space-y-3">
+          className="space-y-3 ">
           {transfers.map((t) => (
-            <div key={t.idPayment}className="bg-[var(--primary-brad-3)] p-4 rounded text-white space-y-1">
+            <div key={t.idPayment}className="bg-[var(--primary-brad-3)] p-4 rounded text-white space-y-1 shadow-2xl">
               <p><strong>Enviador:</strong> {t.senderAccount}</p>
               <p><strong>Destinatário:</strong> {t.receiverAccount}</p>
               <p><strong>Valor:</strong> {t.amountPaid}</p>

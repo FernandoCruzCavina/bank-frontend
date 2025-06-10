@@ -95,7 +95,7 @@ const Home = () => {
 
   return (
     <>
-      <div className="w-screen h-[10vh] bg-[var(--primary-brad-1)] px-[50vh]  z-10">
+      <div className="w-screen h-[10vh] bg-[var(--primary-brad-1)] px-[50vh] z-10">
         <div className="flex flex-col h-full">
           <div className='flex pt-2'>
             <img src={bradesco} alt="" />
@@ -169,8 +169,8 @@ const Home = () => {
 
       <div className="w-screen h-[90vh] bg-white px-[50vh] space-y-4 relative z-0">
         <div className='flex justify-center py-2'>
-          <p className='text-slate-950'>R$</p>
-          <motion.p className='text-4xl text-slate-950 '>{rounded}</motion.p>
+          <p className='text-slate-950 font-bold'>R$</p>
+          <motion.p className='text-4xl text-slate-950 font-bold '>{rounded}</motion.p>
         </div>
 
         <div className="flex">

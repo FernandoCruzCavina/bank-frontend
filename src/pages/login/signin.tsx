@@ -48,7 +48,9 @@ const Signin = ({openLogin}:SigninProps) => {
       console.log(response)
       openLogin()
     } catch (error: any) {
-      
+      toast.error('Erro no cadastro', {
+        description: error.message || error
+      })
     }
   }
 
