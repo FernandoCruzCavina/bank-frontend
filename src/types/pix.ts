@@ -1,6 +1,6 @@
 export interface Pix{
     idPix: number,
-    pixKeyType: string,
+    keyType: string,
     key: string,
     createdAt: number,
     lastUpdatedAt: number,

@@ -1,34 +1,46 @@
 import { motion } from "motion/react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { extract } from "../../services/paymentService"
 import type { ViewPayment } from "../../types/dtos/payment/viewPayment"
+import { fetchExtractByAccountId } from "@/services/accountService"
 
 const History = ({accountId}:{accountId: number | undefined}) => {
   const [query, setQuery] = useState("")
   const [transfers, setTransfers] = useState<ViewPayment[]>([])
 
-  const handleSearch = async() => {
-    const token = localStorage.getItem('token')
+  useEffect(()=>{
+    const init = async()=>{
+      const token = localStorage.getItem('token')
+      if(!token || !accountId)return
+      const paymentAll = await fetchExtractByAccountId(accountId, token)
+      console.log(paymentAll)
+      setTransfers(paymentAll)
+    }
+    init()
+  }, [])
 
-    if(token===null||accountId===undefined) return
+  // const handleSearch = async() => {
+  //   const token = localStorage.getItem('token')
+
+  //   if(token===null||accountId===undefined) return
     
-    const payments = await extract(accountId, token)
+  //   const payments = await extract(accountId, token)
 
-    const formattedTransfers: ViewPayment[] = payments.map((payment) => ({
-      id: payment.idPayment,
-      receiver: payment.receiverAccount,
-      sender: payment.senderAccount,
-      amount: payment.amountPaid,
-      date: payment.paymentCompletionDate,
-      description: payment.paymentDescription
-    }))
+  //   const formattedTransfers: ViewPayment[] = payments.map((payment) => ({
+  //     id: payment.idPayment,
+  //     receiver: payment.receiverAccount,
+  //     sender: payment.senderAccount,
+  //     amount: payment.amountPaid,
+  //     date: payment.paymentCompletionDate,
+  //     description: payment.paymentDescription
+  //   }))
 
-    setTransfers(formattedTransfers)
-  }
+  //   setTransfers(formattedTransfers)
+  // }
 
   return (
     <div className="space-y-4 p-4">
-      <input
+      {/* <input
         type="text"
         placeholder="Buscar transferências por nome ou data"
         value={query}
@@ -40,7 +52,7 @@ const History = ({accountId}:{accountId: number | undefined}) => {
         className="px-4 py-2 bg-amber-400 text-black rounded"
       >
         Buscar
-      </button>
+      </button> */}
 
       {transfers.length > 0 && (
         <motion.div 
@@ -49,12 +61,12 @@ const History = ({accountId}:{accountId: number | undefined}) => {
           variants={itemVariants}
           className="space-y-3">
           {transfers.map((t) => (
-            <div key={t.id}className="bg-[#463898] p-4 rounded text-white space-y-1">
-              <p><strong>Enviador:</strong> {t.sender}</p>
-              <p><strong>Destinatário:</strong> {t.receiver}</p>
-              <p><strong>Valor:</strong> {t.amount}</p>
-              <p><strong>Data:</strong> {t.date}</p>
-              <p><strong>Descrição:</strong> {t.description}</p>
+            <div key={t.idPayment}className="bg-[var(--primary-brad-3)] p-4 rounded text-white space-y-1">
+              <p><strong>Enviador:</strong> {t.senderAccount}</p>
+              <p><strong>Destinatário:</strong> {t.receiverAccount}</p>
+              <p><strong>Valor:</strong> {t.amountPaid}</p>
+              <p><strong>Data:</strong> {t.paymentCompletionDate}</p>
+              <p><strong>Descrição:</strong> {t.paymentDescription}</p>
             </div>
           ))}
         </motion.div>

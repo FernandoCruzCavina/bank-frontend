@@ -103,7 +103,7 @@ const Payment = ({user, account}: PaymentProps) => {
     <div className="space-y-4 p-4">
       <input
         type="text"
-        placeholder="Buscar conta por nome, email ou número"
+        placeholder="Buscar por chave pix(E-mail, CPF, celular ou chave aleatória"
         value={pixKey}
         onChange={(e) => setPixKey(e.target.value)}
         className="w-full p-2 rounded bg-slate-400 text-white placeholder:text-white"
@@ -121,7 +121,7 @@ const Payment = ({user, account}: PaymentProps) => {
           animate="visible"
           exit="hidden"
           variants={itemVariants}
-          className="bg-[#463898] p-4 rounded text-white space-y-2"
+          className="bg-[var(--primary-brad-1)] p-4 rounded text-white space-y-2"
         >
           <p><strong>Número da conta:</strong> {result?.account?.accountNumber}</p>
           <p><strong>Nome:</strong> {result?.user?.username}</p>
@@ -133,9 +133,9 @@ const Payment = ({user, account}: PaymentProps) => {
               placeholder="Valor da transferência"
               value={paymentAmount}
               onChange={(e)=>{setPaymentAmount(e.target.value)}}
-              className="w-full p-2 rounded bg-[#3a3170] text-white"
+              className="w-full p-2 rounded bg-slate-700 text-white placeholder:text-slate-300"
             />
-            <button disabled={isLoading} onClick={()=>{handlePayment()}} className="w-full px-4 py-2 bg-[#15F5BA] text-black rounded">
+            <button disabled={isLoading} onClick={()=>{handlePayment()}} className="w-full px-4 py-2 bg-amber-400 text-black rounded">
               Fazer Pagamento
             </button>
           </div>

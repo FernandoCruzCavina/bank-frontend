@@ -1,8 +1,9 @@
 export interface ViewPayment{
-    id: number
-    receiver: number,
-    sender: number,
-    amount: number,
-    date: number,
-    description: string
+    idPayment: number
+    receiverAccount: number,
+    senderAccount: number,
+    amountPaid: number,
+    paymentRequestDate: number,
+    paymentCompletionDate: number,
+    paymentDescription: string
 }

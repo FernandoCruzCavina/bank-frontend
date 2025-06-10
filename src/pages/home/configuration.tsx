@@ -17,6 +17,7 @@ interface ConfigModalProps{
 
 export const ConfigModal = ({ animate, user, account, onUserUpdate }: ConfigModalProps) => {
   const navigate = useNavigate()
+  const [showSensitive, setShowSensitive] = useState(false)
   const [form, setForm] = useState({
     username: user?.username,
     phone: user?.phone,
@@ -88,8 +89,16 @@ export const ConfigModal = ({ animate, user, account, onUserUpdate }: ConfigModa
       className="absolute w-full h-screen flex flex-col justify-center ite p-16 overflow-y-auto text-white z-40"
     >
       <h2 className="text-4xl font-bold mb-12">⚙️ Configurações</h2>
+    
+      <button
+    onClick={() => setShowSensitive(!showSensitive)}
+    className=" mb-2 px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+  >
+    {showSensitive ? "Ocultar Dados 🔒" : "Mostrar Dados 🔓"}
+  </button>
 
-      <motion.div variants={itemVariants} className="mb-6 space-y-2">
+
+      <motion.div variants={itemVariants} className={`${showSensitive ? '' : 'blur-xs select-none'} mb-6 space-y-2`}>
         <p><strong>ID Usuário:</strong> {fixData.id}</p>
         <p><strong>Email:</strong> {fixData.email}</p>
         <p><strong>CPF:</strong> {fixData.cpf}</p>
@@ -108,7 +117,7 @@ export const ConfigModal = ({ animate, user, account, onUserUpdate }: ConfigModa
             name="username"
             value={form.username}
             onChange={handleChange}
-            className="w-full p-2 rounded bg-slate-300 text-white "
+            className="w-full p-2 rounded bg-slate-400 text-white "
           />
         </div>
         <div>
@@ -118,7 +127,7 @@ export const ConfigModal = ({ animate, user, account, onUserUpdate }: ConfigModa
             name="phone"
             value={form.phone}
             onChange={handleChange}
-            className="w-full p-2 rounded bg-slate-300 text-white"
+            className="w-full p-2 rounded bg-slate-400 text-white"
           />
         </div>
         <div>
@@ -128,7 +137,7 @@ export const ConfigModal = ({ animate, user, account, onUserUpdate }: ConfigModa
             name="oldPassword"
             value={form.oldPassword}
             onChange={handleChange}
-            className="w-full p-2 rounded bg-slate-300 text-white"
+            className="w-full p-2 rounded bg-slate-400 text-white"
           />
         </div>
         <div>
@@ -138,7 +147,7 @@ export const ConfigModal = ({ animate, user, account, onUserUpdate }: ConfigModa
             name="password"
             value={form.newPassword}
             onChange={handleChange}
-            className="w-full p-2 rounded bg-slate-300 text-white"
+            className="w-full p-2 rounded bg-slate-400 text-white"
           />
         </div>
       </motion.div>

@@ -29,6 +29,7 @@ const Home = () => {
   
   const openPaymentModal =  ()=>{setPayment(true)}
   const closePaymentModal =  ()=>{setPayment(false)}
+  const refreshPix = (pix: Pix[])=>{setPix(pix)}
 
   const handleUserUpdate = (updatedUser: User) => {setUser(updatedUser)}
 
@@ -60,6 +61,9 @@ const Home = () => {
       setAccount(account)
       const pix = await fetchAllPixFromAccountByAccountId(account.idAccount, token);
       setPix(pix)
+      console.log(account)
+      console.log(user)
+      console.log(pix)
     }
 
   init()
@@ -98,7 +102,7 @@ const Home = () => {
               <div className='text-red-50'>
                 <UserCircle2 />
               </div>
-              <p>{user?.username}</p>
+              <p className='text-white font-bold'>{user?.username}</p>
             </div>
 
             <div className="flex z-50">
@@ -148,7 +152,7 @@ const Home = () => {
                         variants={getModalVariants(origin.x, origin.y)}
                         className="absolute inset-0 bg-red-400"
                       >
-                        <KeyChoose animate="open" account={account} pix={pix}/>
+                        <KeyChoose animate="open" account={account} pix={pix} refreshPix={refreshPix}/>
                       </motion.div>
                     </div>
                   </div>)}

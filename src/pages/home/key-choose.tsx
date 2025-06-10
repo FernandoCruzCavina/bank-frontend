@@ -1,6 +1,7 @@
-import { deletePixByPixId, createPix } from '@/services/pixService'
+import { deletePixByPixId, createPix, updatePix, fetchAllPixFromAccountByAccountId } from '@/services/pixService'
 import type { Account } from '@/types/account'
 import type { Pix } from '@/types/pix'
+import { Check, Pencil, XIcon } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -9,24 +10,28 @@ interface KeyChooseModalProps {
   animate: 'open' | 'closed',
   account: Account | undefined,
   pix: Pix[] | undefined
+  refreshPix: (pix: Pix[])=>void
 }
 
-const KeyChooseModal = ({ animate, account, pix }: KeyChooseModalProps) => {
+const KeyChooseModal = ({ animate, account, pix, refreshPix }: KeyChooseModalProps) => {
   const [selectedKey, setSelectedKey] = useState<string | null>(null)
   const [step, setStep] = useState<1 | 2>(1)
   const [inputValue, setInputValue] = useState('')
   const [loading, setLoading] = useState(false)
+  const [editingPixId, setEditingPixId] = useState<number | null>(null)
+  const [editingValue, setEditingValue] = useState('')
+  const [editingType, setEditingType] = useState('')
 
   const handleSelect = (value: string) => {
     setSelectedKey(prev => prev === value ? null : value)
   }
 
-  const handleDeleteKey = async (pixId: number) => {
+  const deleteKey = async (pixId: number) => {
     const token = localStorage.getItem('token')
-    if (!token) return
+    if (!token || !account) return
 
     try {
-      const message = await deletePixByPixId(pixId, token)
+      const message = await deletePixByPixId(account?.idAccount, pixId, token)
       toast('Chave deletada', { description: message })
     } catch (error: any) {
       toast.error("Erro ao deletar chave", { description: error.message || error })
@@ -38,17 +43,27 @@ const KeyChooseModal = ({ animate, account, pix }: KeyChooseModalProps) => {
     setStep(2)
   }
 
-  const handleRegisterKey = async () => {
+  const registerKey = async () => {
     const token = localStorage.getItem('token')
-    if (!token || !account || !inputValue ) return
+    if (!token || !account || !inputValue || !selectedKey ) {
+        console.log(token)
+        console.log(account)
+        console.log(inputValue)
+        console.log('stop here')
+        return
+    }
 
     try {
       setLoading(true)
-      const response = await createPix(account.idAccount, inputValue, selectedKey, token)
-
+      const response = await createPix(account.idAccount, inputValue, selectedKey.toUpperCase(), token)
+      console.log(response)
       toast.success('Chave registrada com sucesso', {
         description: 'A chave foi criada com sucesso.',
       })
+
+      const pixAll = await fetchAllPixFromAccountByAccountId(account.idAccount, token)
+      if(!pixAll)return
+      refreshPix(pixAll)
 
       setInputValue('')
       setSelectedKey(null)
@@ -61,6 +76,32 @@ const KeyChooseModal = ({ animate, account, pix }: KeyChooseModalProps) => {
       setLoading(false)
     }
   }
+  const updateKey = async (pixId: number) => {
+    const token = localStorage.getItem('token')
+    if (!token || !account) return
+
+    try {
+        setLoading(true)
+        await updatePix(account.idAccount, editingValue,  pixId, editingType.toUpperCase(), token)
+
+        toast.success('Chave atualizada com sucesso', {
+        description: 'A chave foi alterada.',
+        })
+
+        const pixAll = await fetchAllPixFromAccountByAccountId(account.idAccount, token)
+        if(!pixAll)return
+        refreshPix(pixAll)
+        setEditingPixId(null)
+        setEditingValue('')
+    } catch (error: any) {
+        toast.error('Erro ao atualizar chave', {
+        description: error.message || error
+        })
+    } finally {
+        setLoading(false)
+    }
+  }
+
 
   return (
     <motion.div
@@ -85,7 +126,7 @@ const KeyChooseModal = ({ animate, account, pix }: KeyChooseModalProps) => {
           <div className="flex flex-wrap gap-32 mb-6">
             <motion.div variants={itemVariants} className='space-y-5'>
               <p className='text-2xl font-bold text-red-50'>Selecione uma chave</p>
-              {['Celular', 'E-mail', 'Chave Aleatória', 'CPF'].map((key) => (
+              {['Celular', 'Email', 'Chave Aleatória', 'CPF'].map((key) => (
                 <label key={key} className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
@@ -103,21 +144,56 @@ const KeyChooseModal = ({ animate, account, pix }: KeyChooseModalProps) => {
               <p className='text-2xl font-bold text-red-50'>Chaves atuais</p>
               {pix?.length ? (
                 <ul className="space-y-3">
-                  {pix.map((k, index) => (
-                    <li key={index} className="flex items-center justify-between bg-white/10 px-4 py-2 rounded">
-                      <span>{k.pixKeyType}: {k.key}</span>
-                      <button
-                        onClick={() => handleDeleteKey(k.idPix)}
-                        className="text-sm bg-red-600 px-2 py-1 rounded hover:bg-red-700"
-                      >
-                        Deletar
-                      </button>
+                    {pix.map((k) => (
+                    <li
+                        key={k.idPix}
+                        className="flex items-center justify-between bg-white/10 px-4 py-2 rounded gap-4"
+                    >
+                        {editingPixId === k.idPix ? (
+                        <input
+                            type="text"
+                            value={editingValue}
+                            onChange={e => setEditingValue(e.target.value)}
+                            className="text-black p-1 rounded flex-1"
+                        />
+                        ) : (
+                        <span>{k.keyType}: {k.key}</span>
+                        )}
+
+                        {editingPixId === k.idPix ? (
+                        <button
+                            onClick={() => updateKey(k.idPix)}
+                            disabled={loading || !editingValue}
+                            className="bg-green-500 px-2 py-1 rounded hover:bg-green-600"
+                        >
+                            <Check />
+                        </button>
+                        ) : (
+                        <button
+                            onClick={() => {
+                            setEditingPixId(k.idPix)
+                            setEditingValue(k.key)
+                            setEditingType(k.keyType)
+                            }}
+                            className="bg-pink-400 px-2 py-1 rounded hover:bg-pink-500"
+                        >
+                            <Pencil />
+                        </button>
+                        )}
+
+                        <button
+                        onClick={() => deleteKey(k.idPix)}
+                        className="bg-red-600 px-2 py-1 rounded hover:bg-red-700"
+                        >
+                        <XIcon />
+                        </button>
                     </li>
-                  ))}
+                    ))}
                 </ul>
-              ) : (
+                ) : (
                 <p className="text-slate-300">Nenhuma chave cadastrada</p>
-              )}
+                )}
+
             </motion.div>
           </div>
 
@@ -154,7 +230,7 @@ const KeyChooseModal = ({ animate, account, pix }: KeyChooseModalProps) => {
                 Voltar
               </button>
               <button
-                onClick={handleRegisterKey}
+                onClick={registerKey}
                 disabled={!inputValue || loading}
                 className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-50"
               >
