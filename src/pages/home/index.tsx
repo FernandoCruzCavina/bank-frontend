@@ -198,7 +198,7 @@ const Home = () => {
             className="relative w-full text-red-50"
             onClick={closePaymentModal}
           >
-            histórico
+            extrato
             {!isPayment && (
               <motion.div
                 layoutId="underline"
