@@ -3,6 +3,5 @@ export interface Pix{
     keyType: string,
     key: string,
     createdAt: number,
-    lastUpdatedAt: number,
-    accountModel: number
+    lastUpdatedAt: number
 }

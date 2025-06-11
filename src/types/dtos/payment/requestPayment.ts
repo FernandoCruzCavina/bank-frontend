@@ -1,6 +1,4 @@
-export interface RequestPayment{
-    idAccount: number,
-    pixKey: string,
+export interface RequestPaymentDto{
     paymentDescription: string,
     amountPaid: number
 }

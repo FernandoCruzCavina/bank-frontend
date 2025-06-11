@@ -32,3 +32,13 @@ export const fetchExtractByAccountId= async (accountId: number, token: string): 
 
   return response.data
 }
+
+export const fetchUserIdByAccountId= async (accountId: number, token: string): Promise<number> => {
+  const response = await api.get(`/account/user/${accountId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+
+  return response.data
+}

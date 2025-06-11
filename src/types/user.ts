@@ -3,7 +3,7 @@ export interface User{
   username: string,
   email: string,
   phone: string,
-  birthdayDate: string,
+  birthdayDate: number,
   cpf: string,
   userRole: string
 }

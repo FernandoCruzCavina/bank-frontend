@@ -2,10 +2,10 @@ import type { PixDto } from "@/types/dtos/account/pixDto"
 import { api } from "../lib/axios"
 import type { Pix } from "../types/pix"
 
-export const fetchPixByAccountId = async (accountId: number|undefined, token: string): Promise<Pix|undefined> => {
+export const fetchPixByAccountId = async (accountId: number|undefined, token: string): Promise<Pix[]|undefined> => {
   if(accountId===undefined){return}
   
-  const response = await api.get(`/pix/${accountId}/pix`, {
+  const response = await api.get(`/account/${accountId}/pix`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

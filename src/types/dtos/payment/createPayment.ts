@@ -1,7 +1,4 @@
 export interface CreatePayment{
-    isConfirm: boolean,
-    idAccount: number,
-    pixKey: string,
     paymentDescription: string,
     amountPaid: number
 }

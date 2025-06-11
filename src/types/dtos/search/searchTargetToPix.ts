@@ -5,5 +5,5 @@ import type { User } from "../../user";
 export interface SearchTargetPayment{
     user: User|undefined,
     account: Account|undefined,
-    pix: Pix|undefined
+    pixs: Pix[]|undefined
 }

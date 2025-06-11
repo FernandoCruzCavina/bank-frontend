@@ -1,33 +1,25 @@
+import type { ConfirmCode } from "@/types/dtos/auth/confirmCode";
 import { api } from "../lib/axios";
-// import type { CreatePayment } from "../types/dtos/payment/requestPayment";
 import type { Payment } from "../types/payment";
-import { Client } from "@stomp/stompjs";
-import { WebSocket } from 'ws';
+import type { SendEmail } from "@/types/dtos/payment/emailSender";
 
-// export const sendPix = async() => {
-//     Object.assign(global, {WebSocket})
+export const requestSendPix = async(accountId: number, pixKey: string, email: string, token: string): Promise<string> => {
+    const sendEmail: SendEmail = {
+        email: email
+    }
+    const response = await api.post(`/payment/${accountId}/pix/${pixKey}`, sendEmail, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    })
+    return response.data
+}
 
-//     const client = new Client({
-//         brokerURL: 'ws://localhost:8080/ws-payment',
-//         onConnect: () => {
-//             client.subscribe('/topic/test01', message => console.log(`Received: ${message.body}`));
-//            client.publish({
-//                 destination: "/payment/request",
-//                 body: JSON.stringify({
-//                     idAccount: senderId,
-//                     pixKey: pixTarget.key,
-//                     amountPaid: Number(paymentAmount),
-//                     paymentDescription: "Transferência via WebSocket"
-//                 }),
-//             });
-//         },
-//     });
+export const sendPix = async(confirmCode: ConfirmCode): Promise<string> => {
+    const response = await api.post(`/auth/validate`, confirmCode, {})
 
-//     client.activate()
-// }
-
-
-
+    return response.data
+}
 
 export const extract = async(accountId: number, token: string): Promise<Payment[]> => {
     const response = await api.get(`/payment/${accountId}`, {

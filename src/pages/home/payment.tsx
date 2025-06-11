@@ -1,16 +1,15 @@
+import { requestSendPix, sendPix } from "@/services/paymentService"
+import type { ConfirmCode } from "@/types/dtos/auth/confirmCode"
 import { motion } from "motion/react"
 import { useState } from "react"
-import type { Account } from "../../types/account"
-import type { Pix } from "../../types/pix"
-import { fetchPixByAccountId } from "../../services/pixService"
-import { fetchAccountByPix } from "../../services/accountService"
-import type { User } from "../../types/user"
-import type { RequestPayment } from "../../types/dtos/payment/requestPayment"
-import { fetchUserByUserId } from "../../services/userService"
-import type { SearchTargetPayment } from "../../types/dtos/search/searchTargetToPix"
-import { usePaymentSocket } from "../../hooks/usePaymentSocket"
-import { ConfirmModal } from "../../components/home-modal/confirmModal"
 import { toast } from "sonner"
+import { ConfirmModal } from "../../components/home-modal/confirmModal"
+import { fetchAccountByPix, fetchUserIdByAccountId } from "../../services/accountService"
+import { fetchPixByAccountId } from "../../services/pixService"
+import { fetchUserByUserId } from "../../services/userService"
+import type { Account } from "../../types/account"
+import type { SearchTargetPayment } from "../../types/dtos/search/searchTargetToPix"
+import type { User } from "../../types/user"
 
 interface PaymentProps{
   user: User | undefined
@@ -20,30 +19,22 @@ interface PaymentProps{
 const Payment = ({user, account}: PaymentProps) => {
   const [pixKey, setPixKey] = useState("")
   const [paymentAmount, setPaymentAmount] = useState("")
-  const [result, setResult] = useState<SearchTargetPayment|undefined>()
-  const [pixTarget, setPixTarget] = useState<Pix|undefined>()
+  const [result, setResult] = useState<SearchTargetPayment | undefined>()
   const [isLoading, setIsLoading] = useState(false)
   const [paymentError, setPaymentError] = useState<string | null>(null)
   const [paymentSuccess, setPaymentSuccess] = useState<boolean | null>(null)
-  const [confirmData, setConfirmData] = useState<{ msg: string, onConfirm: () => void, onCancel: () => void} | null>(null);
-  const [webSocketReady, setWebSocketReady] = useState(false)
-  const username = user?.username??"Guest"
-
-  const { sendPaymentRequest } = usePaymentSocket((msg, respond) => {
-  setConfirmData({
-    msg,
-    onConfirm: () => {
-      respond()
+  const [confirmData, setConfirmData] = useState<string | null>(null)
+  const [inputCode, setInputCode] = useState<string | undefined>(undefined)
+  
+  const onCofirm = ()=>{
+      handlePayment()
       setConfirmData(null)
       setPaymentSuccess(true)
-    },
-    onCancel: () => {
-      setConfirmData(null)
-      setPaymentError("Pagamento cancelado.")
-    },
-  })
-}, username, webSocketReady)
-
+  }
+  const onCancel = ()=>{
+    setConfirmData(null)
+    setPaymentError("Pagamento cancelado.")
+  } 
 
   const handleSearch = async() => {
 
@@ -51,15 +42,33 @@ const Payment = ({user, account}: PaymentProps) => {
     if(token===null){return}
 
     try {
+      console.log("iam here")
       const account = await fetchAccountByPix(pixKey, token)
-      const user = await fetchUserByUserId(account.userModel, token)
-      const pix = await fetchPixByAccountId(account.idAccount, token ) 
-      setPixTarget(pix)
-      setResult({user, account, pix})
+      console.log(account)
+      const userId = await fetchUserIdByAccountId(account.idAccount, token)
+      console.log(userId)
+      const user= await fetchUserByUserId(userId , token)
+      console.log(user)
+      const pixs = await fetchPixByAccountId(account.idAccount, token ) 
+      console.log(pixs)
+      setResult({user, account, pixs})
     } catch (error: any) {
       toast.error('Conta não encontrada',{
         description: error.message || error
       })
+    }
+  }
+
+  const analyzePayment = async()=>{
+    const token = localStorage.getItem('token')
+    if(!token || !result?.account || !user)return
+
+    try {
+      console.log(user.email)
+      const response = await requestSendPix(result?.account?.idAccount, pixKey, user?.email, token)
+      setConfirmData(response)
+    } catch (error: any) {
+      toast.error('Erro no pagamento')
     }
   }
 
@@ -68,25 +77,30 @@ const Payment = ({user, account}: PaymentProps) => {
     setPaymentSuccess(null)
 
     try {
-      if (!pixTarget?.key || !account) {
+      if (!result?.pixs || !account || !inputCode || !user) {
         throw new Error("Conta ou chave PIX inválida.")
       }
 
-      setWebSocketReady(true)
-
-      const createPayment: RequestPayment = {
-        paymentDescription: `Pagamento via PIX para ${pixTarget.key}`,
-        amountPaid: Number(paymentAmount),
-        pixKey: pixTarget.key,
+      const confirmCode: ConfirmCode = {
         idAccount: account.idAccount,
+        pixKey: pixKey,
+        code: inputCode,
+        key: user?.email,
+        paymentDescription: `Pagamento via PIX para ${result.user?.username}`,
+        amountPaid: Number(paymentAmount),
       }
+      setIsLoading(true)
+
+      const response = await sendPix(confirmCode)
 
       setTimeout(() => {
-        sendPaymentRequest(createPayment)
-        setIsLoading(true)
-      }, 200)
+        setIsLoading(false)
+        setPaymentSuccess(true)
+        console.log(response)
+      }, 400)
     } catch (error) {
       console.error(error)
+      setIsLoading(false)
       setPaymentError("Erro ao iniciar o pagamento.")
     }
   }
@@ -125,9 +139,9 @@ const Payment = ({user, account}: PaymentProps) => {
               placeholder="Valor da transferência"
               value={paymentAmount}
               onChange={(e)=>{setPaymentAmount(e.target.value)}}
-              className="w-full p-2 rounded bg-slate-700 text-white placeholder:text-slate-300"
+              className="w-full p-2 rounded bg-slate-400 text-white placeholder:text-white"
             />
-            <button disabled={isLoading} onClick={()=>{handlePayment()}} className="w-full px-4 py-2 bg-amber-400 text-black rounded">
+            <button disabled={isLoading} onClick={()=>{analyzePayment()}} className="w-full px-4 py-2 bg-amber-400 text-black rounded">
               Fazer Pagamento
             </button>
           </div>
@@ -175,9 +189,11 @@ const Payment = ({user, account}: PaymentProps) => {
       )}
       {confirmData && (
         <ConfirmModal
-          message={confirmData.msg}
-          onConfirm={confirmData.onConfirm}
-          onCancel={confirmData.onCancel}
+          message={confirmData}
+          inputCode={inputCode}
+          setInputCode={setInputCode}
+          onConfirm={onCofirm}
+          onCancel={onCancel}
         />
       )}
 

@@ -1,5 +1,6 @@
 import { fetchAllPixFromAccountByAccountId } from '@/services/pixService'
 import type { Pix } from '@/types/pix'
+import { formatAccountDates, formatUserDates } from '@/utils/formattedDate'
 import { KeyIcon, Settings, UserCircle2, XIcon } from 'lucide-react'
 import { animate, AnimatePresence, motion, useMotionValue, useTransform, type Variants } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
@@ -59,13 +60,15 @@ const Home = () => {
       if (!token) return
 
       const user = await fetchUserByToken(token)
-      setUser(user)
+      const userTransform = formatUserDates(user)
+      setUser(userTransform)
       const account = await fetchAccountByUserId(user.id, token)
-      setAccount(account)
+      const accountTransform = formatAccountDates(account)
+      setAccount(accountTransform)
       const pix = await fetchAllPixFromAccountByAccountId(account.idAccount, token);
       setPix(pix)
-      console.log(account)
-      console.log(user)
+      console.log(userTransform)
+      console.log(accountTransform)
       console.log(pix)
     }
 
