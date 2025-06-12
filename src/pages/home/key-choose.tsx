@@ -33,6 +33,9 @@ const KeyChooseModal = ({ animate, account, pix, refreshPix }: KeyChooseModalPro
     try {
       const message = await deletePixByPixId(account?.idAccount, pixId, token)
       toast('Chave deletada', { description: message })
+      const pixAll = await fetchAllPixFromAccountByAccountId(account.idAccount, token)
+      if (!pixAll) return
+      refreshPix(pixAll)
     } catch (error: any) {
       toast.error("Erro ao deletar chave", { description: error.message || error })
     }

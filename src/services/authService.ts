@@ -10,3 +10,9 @@ export const login = async (loginUser: LoginUser) => {
 export const refresh = async () => {
     
 }
+
+export const getTokenFromRefreshToken = async (refreshToken: string): Promise<string> => {
+    const response = await api.post('/auth/refresh', refreshToken, {})
+
+    return response.data
+}

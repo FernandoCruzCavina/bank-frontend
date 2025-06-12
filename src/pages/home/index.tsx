@@ -58,7 +58,7 @@ const Home = () => {
     const init = async () => {
       const token = localStorage.getItem("token")
       if (!token) return
-
+      
       const user = await fetchUserByToken(token)
       const userTransform = formatUserDates(user)
       setUser(userTransform)

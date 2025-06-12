@@ -1,4 +1,4 @@
-import { requestSendPix, sendPix } from "@/services/paymentService"
+import { requestSendPix, sendPix, sendPixDirect } from "@/services/paymentService"
 import type { ConfirmCode } from "@/types/dtos/auth/confirmCode"
 import { motion } from "motion/react"
 import { useState } from "react"
@@ -10,6 +10,7 @@ import { fetchUserByUserId } from "../../services/userService"
 import type { Account } from "../../types/account"
 import type { SearchTargetPayment } from "../../types/dtos/search/searchTargetToPix"
 import type { User } from "../../types/user"
+import type { CreatePayment } from "@/types/dtos/payment/createPayment"
 
 interface PaymentProps{
   user: User | undefined
@@ -21,19 +22,18 @@ const Payment = ({user, account}: PaymentProps) => {
   const [paymentAmount, setPaymentAmount] = useState("")
   const [result, setResult] = useState<SearchTargetPayment | undefined>()
   const [isLoading, setIsLoading] = useState(false)
-  const [paymentError, setPaymentError] = useState<string | null>(null)
-  const [paymentSuccess, setPaymentSuccess] = useState<boolean | null>(null)
   const [confirmData, setConfirmData] = useState<string | null>(null)
+  const [codeModal, setCodeModal] = useState<boolean | null>(null)
   const [inputCode, setInputCode] = useState<string | undefined>(undefined)
   
-  const onCofirm = ()=>{
-      handlePayment()
+  const onConfirm = ()=>{
+      codeModal ? paymentWithCode() : paymentWithoutCode()
+      setCodeModal(null)
       setConfirmData(null)
-      setPaymentSuccess(true)
   }
   const onCancel = ()=>{
+    setCodeModal(null)
     setConfirmData(null)
-    setPaymentError("Pagamento cancelado.")
   } 
 
   const handleSearch = async() => {
@@ -42,15 +42,10 @@ const Payment = ({user, account}: PaymentProps) => {
     if(token===null){return}
 
     try {
-      console.log("iam here")
       const account = await fetchAccountByPix(pixKey, token)
-      console.log(account)
       const userId = await fetchUserIdByAccountId(account.idAccount, token)
-      console.log(userId)
       const user= await fetchUserByUserId(userId , token)
-      console.log(user)
-      const pixs = await fetchPixByAccountId(account.idAccount, token ) 
-      console.log(pixs)
+      const pixs = await fetchPixByAccountId(account.idAccount, token )
       setResult({user, account, pixs})
     } catch (error: any) {
       toast.error('Conta não encontrada',{
@@ -66,15 +61,47 @@ const Payment = ({user, account}: PaymentProps) => {
     try {
       console.log(user.email)
       const response = await requestSendPix(result?.account?.idAccount, pixKey, user?.email, token)
+      if(response === "Você realmente deseja fazer esse pagamento?"){
+        setCodeModal(false)
+        setConfirmData(response)
+        return
+      }
+      setCodeModal(true)
       setConfirmData(response)
     } catch (error: any) {
       toast.error('Erro no pagamento')
     }
   }
 
-  const handlePayment = async () => {
-    setPaymentError(null)
-    setPaymentSuccess(null)
+  const paymentWithoutCode = async () => {
+    setIsLoading(true)
+
+    try {
+      const token = localStorage.getItem('token')
+      if(!token || !result?.pixs || !result.user || !account){
+        throw new Error("Conta ou chave PIX inválida.")
+      }
+
+      const paymentDto: CreatePayment = {
+        amountPaid: Number(paymentAmount),
+        paymentDescription: `Pagamento via PIX para ${result.user?.username}`
+      }
+
+      const response = await sendPixDirect(account?.idAccount, result.pixs[1].key, paymentDto, token)
+
+      toast('Pagamento Realizado', {description: response})
+
+    } catch (error) {
+      console.error(error)
+      toast.error('Erro no pagamento')
+    } finally {
+      setIsLoading(false)
+    }
+  } 
+
+
+  const paymentWithCode = async () => {
+    setIsLoading(true)
 
     try {
       if (!result?.pixs || !account || !inputCode || !user) {
@@ -89,19 +116,17 @@ const Payment = ({user, account}: PaymentProps) => {
         paymentDescription: `Pagamento via PIX para ${result.user?.username}`,
         amountPaid: Number(paymentAmount),
       }
-      setIsLoading(true)
 
       const response = await sendPix(confirmCode)
 
       setTimeout(() => {
-        setIsLoading(false)
-        setPaymentSuccess(true)
-        console.log(response)
+        toast('Pagamento realizado', {description: response})
       }, 400)
     } catch (error) {
       console.error(error)
+      toast.error('Erro ao iniciar o pagamento.')
+    } finally {
       setIsLoading(false)
-      setPaymentError("Erro ao iniciar o pagamento.")
     }
   }
 
@@ -161,42 +186,21 @@ const Payment = ({user, account}: PaymentProps) => {
             transition={{ duration: 0.3 }}
             className="flex flex-col items-center space-y-4"
           >
-            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-[#15F5BA]"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-[var(--primary-brad-3)]"></div>
             <p className="text-white text-xl font-semibold">Processando pagamento...</p>
           </motion.div>
         </motion.div>
       )}
-
-      {paymentError && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="text-red-400 mt-2 text-center"
-        >
-          {paymentError}
-        </motion.div>
-      )}
-      {paymentSuccess && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="text-green-400 mt-2 text-center"
-        >
-          Pagamento realizado com sucesso!
-        </motion.div>
-      )}
-      {confirmData && (
+      {codeModal !== null && (
         <ConfirmModal
           message={confirmData}
           inputCode={inputCode}
+          codeModal={codeModal}
           setInputCode={setInputCode}
-          onConfirm={onCofirm}
+          onConfirm={onConfirm}
           onCancel={onCancel}
         />
       )}
-
     </div>
   )
 }
