@@ -21,7 +21,6 @@ const Signin = ({openLogin}:SigninProps) => {
     const birthdayDate = data.get('birthday')?.toString()
 
     if(!(password === confirmPassword)){
-      console.log('erro')
       toast.error("As senhas não coincidem", {
         description: "Verifique os campos de senha e confirme novamente.",
       })
@@ -31,7 +30,9 @@ const Signin = ({openLogin}:SigninProps) => {
     if(username === undefined || email === undefined || password === undefined 
       || phone === undefined || cpf === undefined || birthdayDate === undefined
     ) { 
-      console.log('undefined') 
+      toast.error("Todos os campos não estão preenchidos", {
+        description: "Verifique se todos os campos estão completos"
+      })
       return
     }
 
@@ -47,9 +48,10 @@ const Signin = ({openLogin}:SigninProps) => {
   
       console.log(response)
       openLogin()
+      toast.success("Cadastrado com sucesso!")
     } catch (error: any) {
       toast.error('Erro no cadastro', {
-        description: error.message || error
+        description: error.error.response.data.message || error
       })
     }
   }

@@ -3,12 +3,10 @@ import { api } from "../lib/axios";
 import type { Payment } from "../types/payment";
 import type { SendEmail } from "@/types/dtos/payment/emailSender";
 import type { CreatePayment } from "@/types/dtos/payment/createPayment";
+import type { paymentAnalyzeDto } from "@/types/dtos/payment/requestPayment";
 
-export const requestSendPix = async(accountId: number, pixKey: string, email: string, token: string): Promise<string> => {
-    const sendEmail: SendEmail = {
-        email: email
-    }
-    const response = await api.post(`/payment/${accountId}/pix/${pixKey}`, sendEmail, {
+export const requestSendPix = async(accountId: number, pixKey: string, paymentAnalyzeDto: paymentAnalyzeDto, token: string): Promise<string> => {
+    const response = await api.post(`/payment/${accountId}/pix/${pixKey}`, paymentAnalyzeDto, {
         headers: {
             Authorization: `Bearer ${token}`
         }

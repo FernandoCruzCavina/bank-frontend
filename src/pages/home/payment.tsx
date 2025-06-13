@@ -11,6 +11,7 @@ import type { Account } from "../../types/account"
 import type { SearchTargetPayment } from "../../types/dtos/search/searchTargetToPix"
 import type { User } from "../../types/user"
 import type { CreatePayment } from "@/types/dtos/payment/createPayment"
+import type { paymentAnalyzeDto } from "@/types/dtos/payment/requestPayment"
 
 interface PaymentProps{
   user: User | undefined
@@ -49,7 +50,7 @@ const Payment = ({user, account}: PaymentProps) => {
       setResult({user, account, pixs})
     } catch (error: any) {
       toast.error('Conta não encontrada',{
-        description: error.message || error
+        description: error.response.data.message || error
       })
     }
   }
@@ -59,8 +60,14 @@ const Payment = ({user, account}: PaymentProps) => {
     if(!token || !result?.account || !user)return
 
     try {
-      console.log(user.email)
-      const response = await requestSendPix(result?.account?.idAccount, pixKey, user?.email, token)
+      const paymentAnalyzeDto: paymentAnalyzeDto = {
+        amountPaid: Number(paymentAmount),
+        paymentDescription: `Pagamento via PIX para ${result.user?.username}`,
+        email: user.email
+      }
+      
+      const response = await requestSendPix(result?.account?.idAccount, pixKey, paymentAnalyzeDto, token)
+      
       if(response === "Você realmente deseja fazer esse pagamento?"){
         setCodeModal(false)
         setConfirmData(response)
@@ -69,7 +76,7 @@ const Payment = ({user, account}: PaymentProps) => {
       setCodeModal(true)
       setConfirmData(response)
     } catch (error: any) {
-      toast.error('Erro no pagamento')
+      toast.error('Erro no pagamento', {description: error.response.data.message || error})
     }
   }
 
@@ -89,11 +96,11 @@ const Payment = ({user, account}: PaymentProps) => {
 
       const response = await sendPixDirect(account?.idAccount, result.pixs[1].key, paymentDto, token)
 
-      toast('Pagamento Realizado', {description: response})
+      toast.success('Pagamento Realizado', {description: response})
 
-    } catch (error) {
+    } catch (error: any) {
       console.error(error)
-      toast.error('Erro no pagamento')
+      toast.error('Erro no pagamento', {description: error.response.data.message || error})
     } finally {
       setIsLoading(false)
     }
@@ -122,9 +129,9 @@ const Payment = ({user, account}: PaymentProps) => {
       setTimeout(() => {
         toast('Pagamento realizado', {description: response})
       }, 400)
-    } catch (error) {
+    } catch (error: any) {
       console.error(error)
-      toast.error('Erro ao iniciar o pagamento.')
+      toast.error('Erro ao iniciar o pagamento.', {description: error.response.data.message || error})
     } finally {
       setIsLoading(false)
     }

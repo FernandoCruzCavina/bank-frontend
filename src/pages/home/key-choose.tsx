@@ -32,12 +32,12 @@ const KeyChooseModal = ({ animate, account, pix, refreshPix }: KeyChooseModalPro
 
     try {
       const message = await deletePixByPixId(account?.idAccount, pixId, token)
-      toast('Chave deletada', { description: message })
+      toast.success('Chave deletada', { description: message })
       const pixAll = await fetchAllPixFromAccountByAccountId(account.idAccount, token)
       if (!pixAll) return
       refreshPix(pixAll)
     } catch (error: any) {
-      toast.error("Erro ao deletar chave", { description: error.message || error })
+      toast.error("Erro ao deletar chave", { description: error.response.data.message || error })
     }
   }
 
@@ -73,10 +73,9 @@ const KeyChooseModal = ({ animate, account, pix, refreshPix }: KeyChooseModalPro
       setStep(1)
     } catch (error: any) {
       toast.error('Erro ao registrar chave', {
-        description: error.message || error
+        description: error.response.data.message || error
       })
       console.log(error)
-      console.log(error.message)
     } finally {
       setLoading(false)
     }
@@ -100,7 +99,7 @@ const KeyChooseModal = ({ animate, account, pix, refreshPix }: KeyChooseModalPro
         setEditingValue('')
     } catch (error: any) {
         toast.error('Erro ao atualizar chave', {
-        description: error.message || error
+        description: error.response.data.message || error
         })
     } finally {
         setLoading(false)
@@ -218,7 +217,9 @@ const KeyChooseModal = ({ animate, account, pix, refreshPix }: KeyChooseModalPro
             className="flex justify-between gap-4 mt-8"
           >
             <button
-              onClick={handleContinue}
+              onClick={() => {
+                selectedKey === "Chave Aleatória" ? registerKey() : handleContinue()
+              }}
               disabled={!selectedKey}
               className={`px-4 py-2 rounded text-black ${selectedKey ? 'bg-[#15F5BA] hover:brightness-110' : 'bg-gray-400 cursor-not-allowed'}`}
             >

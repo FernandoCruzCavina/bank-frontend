@@ -1,7 +1,8 @@
+import type { AuthenticationTokensDto } from "@/types/dtos/auth/authenticationTokens"
 import { api } from "../lib/axios"
 import type { LoginUser } from "../types/dtos/auth/login"
 
-export const login = async (loginUser: LoginUser) => {
+export const login = async (loginUser: LoginUser | undefined): Promise<AuthenticationTokensDto> => {
     const response = await api.post('/auth/login', loginUser)
 
     return response.data

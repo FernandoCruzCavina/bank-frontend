@@ -2,6 +2,7 @@ import { type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { login } from '../../services/authService'
 import bradesco from '../../assets/bradesco-vertical-w.png';
+import { toast } from 'sonner';
 interface LogInProps{
     closeLogin: ()=> void
 }
@@ -17,22 +18,23 @@ const LogIn = ({closeLogin}:LogInProps) => {
     const email = data.get('email')?.toString()
     const password = data.get('password')?.toString()
 
-    if(email === undefined || password === undefined) return
-
-    const response = await login({
-      email: email,
-      password: password 
-    })
-    console.log(response)
-    const {token, refreshToken} = response
-    console.log(token)
-
-    localStorage.removeItem('token')
-    localStorage.removeItem('refresh')
-    localStorage.setItem('token', token)
-    localStorage.setItem('refresh', refreshToken)
-
-    navigate('/')
+    try {
+      const response = await login({
+        email: email,
+        password: password 
+      })
+      console.log(response)
+      const {token, refreshToken} = response
+  
+      localStorage.removeItem('token')
+      localStorage.removeItem('refresh')
+      localStorage.setItem('token', token)
+      localStorage.setItem('refresh', refreshToken)
+  
+      navigate('/')
+    } catch (error: any) {
+      toast.error('Erro no login', {description: error.response.data.message || "Erro inesperado no login"})
+    }
   }
 
   return (

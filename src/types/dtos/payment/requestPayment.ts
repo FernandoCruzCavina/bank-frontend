@@ -1,4 +1,5 @@
-export interface RequestPaymentDto{
+export interface paymentAnalyzeDto{
     paymentDescription: string,
-    amountPaid: number
+    amountPaid: number,
+    email: string
 }
