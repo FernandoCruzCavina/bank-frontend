@@ -12,6 +12,7 @@ import type { SearchTargetPayment } from "../../types/dtos/search/searchTargetTo
 import type { User } from "../../types/user"
 import type { CreatePayment } from "@/types/dtos/payment/createPayment"
 import type { paymentAnalyzeDto } from "@/types/dtos/payment/requestPayment"
+import { formatAccountDates, formatDate } from "@/utils/formattedDate"
 
 interface PaymentProps{
   user: User | undefined
@@ -161,10 +162,9 @@ const Payment = ({user, account}: PaymentProps) => {
           variants={itemVariants}
           className="bg-[var(--primary-brad-1)] p-4 rounded text-white space-y-2"
         >
-          <p><strong>Número da conta:</strong> {result?.account?.accountNumber}</p>
           <p><strong>Nome:</strong> {result?.user?.username}</p>
           <p><strong>Email:</strong> {result?.user?.email}</p>
-          <p><strong>Data de Abertura:</strong> {result?.account?.createdAt}</p>
+          <p><strong>Data de Abertura:</strong>{" "}{result.account?.createdAt ? formatDate(result.account.createdAt) : "Não disponível"}</p>
           <div className="space-y-2">
             <input
               type="number"

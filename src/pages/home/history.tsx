@@ -23,7 +23,6 @@ const History = ({accountId}:{accountId: number | undefined}) => {
       const token = localStorage.getItem('token')
       if(!token || !accountId)return
       const paymentAll = await fetchExtractByAccountId(accountId, token)
-      console.log(paymentAll)
       setTransfers(paymentAll)
     }
     init()
@@ -56,8 +55,8 @@ const History = ({accountId}:{accountId: number | undefined}) => {
                 key={t.idPayment}
                 className="bg-[var(--primary-brad-3)] p-4 rounded text-white space-y-1 shadow-2xl"
               >
-                <p><strong>Enviador:</strong> {t.senderAccount}</p>
-                <p><strong>Destinatário:</strong> {t.receiverAccount}</p>
+                {/* <p><strong>Enviador:</strong> {t.senderAccount}</p>
+                <p><strong>Destinatário:</strong> {t.receiverAccount}</p> */}
                 <p><strong>Valor:</strong> {t.amountPaid}</p>
                 <p><strong>Data:</strong> {t.paymentCompletionDate}</p>
                 <p><strong>Descrição:</strong> {t.paymentDescription}</p>

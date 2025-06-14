@@ -58,7 +58,7 @@ export const ConfigModal = ({ animate, user, account, onUserUpdate }: ConfigModa
       user = await updateUser(user?.id, newUser, token)
       console.log("Atualizando:", form)
       onUserUpdate(user)
-      toast("Atualizado com sucesso!", {
+      toast.success("Atualizado com sucesso!", {
         description: "nome, telefone e senha"
       })
     } catch (error: any) {
@@ -143,7 +143,7 @@ export const ConfigModal = ({ animate, user, account, onUserUpdate }: ConfigModa
           <label>Nova Senha:</label>
           <input
             type="password"
-            name="password"
+            name="newPassword"
             value={form.newPassword}
             onChange={handleChange}
             className="w-full p-2 rounded bg-slate-400 text-white"

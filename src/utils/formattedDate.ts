@@ -37,3 +37,15 @@ export const formatAccountDates = (account: Account | undefined): Account | unde
     lastUpdatedAt: dateLastUpdateAt
   }
 }
+
+export const formatDate = (epochUTC: number | undefined) => {
+  if (!epochUTC) return ""
+
+  return new Date(epochUTC).toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  })
+}

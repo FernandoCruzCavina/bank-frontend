@@ -50,6 +50,7 @@ const Signin = ({openLogin}:SigninProps) => {
       openLogin()
       toast.success("Cadastrado com sucesso!")
     } catch (error: any) {
+      console.error(error)
       toast.error('Erro no cadastro', {
         description: error.error.response.data.message || error
       })
